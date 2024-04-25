@@ -56,4 +56,4 @@ CARLA can be used to simulate complex driving scenarios incorporating several va
 
   * * *
 
-  ### References
+### References
