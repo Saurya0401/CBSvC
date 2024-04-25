@@ -5,6 +5,9 @@
 
 * * *
 
+### Proposed Timeline
+![Proposed Timeline](blob/Timeline2.jpg?raw=true)
+
 ### Team Member Responsibilities
 * **Aniruddha Chaki**
   - Data collection configuration
