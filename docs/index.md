@@ -6,7 +6,7 @@
 * * *
 
 ### Proposed Timeline
-![Proposed Timeline](blob/Timeline2.jpg)
+![Proposed Timeline](/CBSvC/assets/images/Timeline2.jpg)
 
 * * *
 
