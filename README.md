@@ -20,10 +20,8 @@ We would like to analyze the effects, if any, of drivers with varying behaviors 
 - Conduct a comprehensive case study demonstrating real human driving behaviors under different traffic conditions. This study will help in understanding the impact of crowd densities on driving patterns and stress levels
 
 ## System Blocks ##
-TBA
-<!---
-![alt text](https://github.com/Saurya0401/CBSvC/blob/main/image.jpg?raw=true)
---->
+
+![Block Diagram](blob/BlockDiagram2.jpg?raw=true)
 
 ## Hardware and Software Requirements ##
 Hardware requirements include:
@@ -46,10 +44,10 @@ Research and Design algorithms for the analysis required on collected data, Test
 Data collection configuration, Test drive of the simulation, Setting up simulation constraints
 
 ## Project Timeline ##
-TBA
-<!---
-![alt text](https://github.com/Saurya0401/CBSvC/blob/main/image.jpg?raw=true)
---->
+
+
+![Timeline](blob/Timeline2.jpg?raw=true)
+
 ## References ##
 <a id="1">[1]</a>  Y. Xia, M. Geng, Y. Chen, B. Zhang, Z. Gao, and X. (M.) Chen, "Understanding common human driving semantics for autonomous vehicles," IEEE Transactions on Intelligent Transportation Systems, 2023.
 
