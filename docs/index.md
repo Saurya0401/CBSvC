@@ -14,7 +14,7 @@ This study aims to evaluate the physiological impacts of interacting with driver
 Our background review focuses on evaluating driver behavior, driver monitoring with biometrics, and. We researched studies aimed at enhancing road safety, improving accident prevention technologies, and aspects of human-driven and autonomous vehicle interactions that were relevant to our subject matter. The key findings are as follows:
 
 #### Evaluating Driver Behavior in Varied Driving Scenarios
-Studying driver behavior under varying conditions in a simulated environment is an important aspect of our research. Xu et al. [^1] analyze the differences in the responses of novice and experienced drivers to visually overwhelming traffic violations by observing their eye movements. Factors such as varied lighting and weather conditions however were not explored. Another study assessed the impact of repeated frustrating events on driver aggression among university students [^2]. The results show that the stress from such events could enhance aggressive behaviors. However, the study did not consider the influence of other aggressive drivers on the ego vehicle. Our research goal is thus to introduce new variables in driving scenarios and also evaluate how surrounding drivers can affect driving behavior.
+Studying driver behavior under varying conditions in a simulated environment is an important aspect of our research. Xu et al. [^1] analyzes the differences in the responses of novice and experienced drivers to visually overwhelming traffic violations by observing their eye movements. Factors such as varied lighting and weather conditions however were not explored. Another study assessed the impact of repeated frustrating events on driver aggression among university students [^2]. The results show that the stress from such events could enhance aggressive behaviors. However, the study did not consider the influence of other aggressive drivers on the ego vehicle. Our research goal is thus to introduce new variables in driving scenarios and also evaluate how surrounding drivers can affect driving behavior.
 
 #### Leveraging Biometrics for Effective Driver Monitoring
 Montanaro et al. [^3] introduce a novel driver monitoring system that combines behavioral and physiological data to assess drivers' state. Biometric sensors and facial recognition are used to quantify the driver’s sleepiness and fatigue levels. The system is effective in measuring fatigue but has two key drawbacks: dependence on consistent lighting and delays in processing sensor data in real time.
@@ -53,3 +53,7 @@ CARLA can be used to simulate complex driving scenarios incorporating several va
   - Research and Design algorithms for the analysis required on collected data
   - Test driving the simulation
   - Setting up simulation constraints
+
+  * * *
+
+  ### References
