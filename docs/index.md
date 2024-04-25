@@ -6,7 +6,9 @@
 * * *
 
 ### Proposed Timeline
-![Proposed Timeline](blob/Timeline2.jpg?raw=true)
+![Proposed Timeline](blob/Timeline2.jpg)
+
+* * *
 
 ### Team Member Responsibilities
 * **Aniruddha Chaki**
