@@ -76,9 +76,9 @@ def main():
     argparser.add_argument(
         '-w', '--number-of-walkers',
         metavar='W',
-        default=1,
+        default=10,
         type=int,
-        help='Number of walkers (default: 1)')
+        help='Number of walkers (default: 10)')
     argparser.add_argument(
         '--safe',
         action='store_true',
@@ -148,6 +148,12 @@ def main():
         action='store_true',
         default=False,
         help='Activate no rendering mode')
+    argparser.add_argument(
+        '--aggression',
+        action='store_true',
+        default=False,
+        help='Enable aggressive driving')
+
 
     args = argparser.parse_args()
 
@@ -163,16 +169,12 @@ def main():
 
     try:
         world = client.get_world()
-
         traffic_manager = client.get_trafficmanager(args.tm_port)
-        traffic_manager.set_global_distance_to_leading_vehicle(2.5)
         
-
-        # modified settings
-        traffic_manager.set_global_distance_to_leading_vehicle(1.0)
-        traffic_manager.global_percentage_speed_difference(150.0)
-        # traffic_manager.ignore_lights_percentage(20.0)
-        #
+        if args.aggression:
+            traffic_manager.set_global_distance_to_leading_vehicle(random.random_sample() + 1)
+        else:
+            traffic_manager.set_global_distance_to_leading_vehicle(2.5)
         if args.respawn:
             traffic_manager.set_respawn_dormant_vehicles(True)
         if args.hybrid:
@@ -248,8 +250,27 @@ def main():
                 blueprint.set_attribute('role_name', 'autopilot')
 
             # spawn the cars and set their autopilot and light state all together
-            batch.append(SpawnActor(blueprint, transform)
-                .then(SetAutopilot(FutureActor, True, traffic_manager.get_port())))
+            vehicle_actor = world.spawn_actor(blueprint,transform)
+            
+            if args.aggression:
+                lane_change = random.random_sample()
+                ignore_light = random.random_sample()
+                ignore_signs = random.random_sample()
+                overspeed = random.random_sample()
+                if lane_change < 0.5:
+                    direction = random.random_sample()
+                    if direction < 0.5:
+                        traffic_manager.force_lane_change(vehicle_actor, True)
+                    else:
+                        traffic_manager.force_lane_change(vehicle_actor, False)
+                if ignore_light < 0.5:
+                    traffic_manager.ignore_lights_percentage(vehicle_actor, 70.0)
+                if ignore_signs < 0.5:
+                    traffic_manager.ignore_signs_percentage(vehicle_actor, 70.0)
+                if overspeed < 0.5:
+                    traffic_manager.vehicle_percentage_speed_difference(vehicle_actor, -20.0)
+            vehicle_actor.set_autopilot(True, traffic_manager.get_port())
+            batch.append(vehicle_actor)
 
         for response in client.apply_batch_sync(batch, synchronous_master):
             if response.error:
@@ -375,8 +396,8 @@ def main():
 
         time.sleep(0.5)
 
-
 if __name__ == '__main__':
+
     try:
         main()
     except KeyboardInterrupt:
