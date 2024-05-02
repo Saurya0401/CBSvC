@@ -250,33 +250,31 @@ def main():
                 blueprint.set_attribute('role_name', 'autopilot')
 
             # spawn the cars and set their autopilot and light state all together
-            vehicle_actor = world.spawn_actor(blueprint,transform)
-            
-            if args.aggression:
-                lane_change = random.random_sample()
-                ignore_light = random.random_sample()
-                ignore_signs = random.random_sample()
-                overspeed = random.random_sample()
-                if lane_change < 0.5:
-                    direction = random.random_sample()
-                    if direction < 0.5:
-                        traffic_manager.force_lane_change(vehicle_actor, True)
-                    else:
-                        traffic_manager.force_lane_change(vehicle_actor, False)
-                if ignore_light < 0.5:
-                    traffic_manager.ignore_lights_percentage(vehicle_actor, 70.0)
-                if ignore_signs < 0.5:
-                    traffic_manager.ignore_signs_percentage(vehicle_actor, 70.0)
-                if overspeed < 0.5:
-                    traffic_manager.vehicle_percentage_speed_difference(vehicle_actor, -20.0)
-            vehicle_actor.set_autopilot(True, traffic_manager.get_port())
-            batch.append(vehicle_actor)
+            batch.append(SpawnActor(blueprint, transform)
+                .then(SetAutopilot(FutureActor, True, traffic_manager.get_port())))
 
         for response in client.apply_batch_sync(batch, synchronous_master):
             if response.error:
                 logging.error(response.error)
             else:
                 vehicles_list.append(response.actor_id)
+
+        # set aggressive behavior
+        if args.aggression:
+            all_vehicle_actors = world.get_actors(vehicles_list)
+            for vehicle_actor in all_vehicle_actors:
+                lane_change = random.random_sample() < 0.5
+                ignore_light = random.random_sample() < 0.5
+                ignore_signs = random.random_sample() < 0.5
+                overspeed = random.random_sample() < 0.5
+                if lane_change:
+                    traffic_manager.force_lane_change(vehicle_actor, random.random_sample() < 0.5)
+                if ignore_light:
+                    traffic_manager.ignore_lights_percentage(vehicle_actor, 70.0)
+                if ignore_signs:
+                    traffic_manager.ignore_signs_percentage(vehicle_actor, 70.0)
+                if overspeed:
+                    traffic_manager.vehicle_percentage_speed_difference(vehicle_actor, -20.0)
 
         # Set automatic vehicle lights update if specified
         if args.car_lights_on:
