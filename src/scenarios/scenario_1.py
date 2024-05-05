@@ -60,7 +60,7 @@ def main():
         traffic_gen.spawn_vehicles()
         if args.aggression:
             traffic_gen.set_aggressive_behavior()
-        if args.car_lights_on:
+        if not args.disable_car_lights:
             traffic_gen.set_automatic_vehicle_lights()
         traffic_gen.spawn_walkers()
         logging.info(
@@ -179,10 +179,10 @@ if __name__ == '__main__':
         type=int,
         help='Set the seed for pedestrians module')
     argparser.add_argument(
-        '--car-lights-on',
+        '--disable-car-lights',
         action='store_true',
         default=False,
-        help='Enable automatic car light management')
+        help='Disable automatic car light management')
     argparser.add_argument(
         '--hero',
         action='store_true',

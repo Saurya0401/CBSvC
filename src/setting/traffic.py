@@ -155,6 +155,7 @@ class TrafficGenerator:
         all_vehicle_actors = self.world.get_actors(self.vehicles_list)
         for actor in all_vehicle_actors:
             self.traffic_manager.update_vehicle_lights(actor, True)
+        logging.info('Car lights will be automatically managed by Traffic Manager')
 
     def spawn_walkers(self):
         # some settings
