@@ -24,7 +24,7 @@ import carla
 from numpy import random
 
 from src.setting.traffic import TrafficGenerator
-from src.setting.weather import WeatherType, WeatherManager
+from src.setting.weather import WeatherType, WeatherManager, TimeOfDay
 
 
 def set_global_settings(world, traffic_manager):
@@ -72,6 +72,8 @@ def main():
         # initialize weather
         weather_man = WeatherManager(world, traffic_gen.vehicles_list)
         weather_man.set_weather(WeatherType[args.weather.upper()])
+        weather_man.set_time_of_day(TimeOfDay[args.time.upper()])
+        weather_man.apply_settings()
 
         vehicles_list = traffic_gen.vehicles_list
         walkers_list = traffic_gen.walkers_list
@@ -137,6 +139,11 @@ if __name__ == '__main__':
         choices=['clear', 'foggy', 'rainy'],
         default='clear',
         help='Set weather type (default: %(default)s)')
+    argparser.add_argument(
+        '--time',
+        choices=['noon', 'night'],
+        default='noon',
+        help='Set time of day (default: %(default)s)')
     argparser.add_argument(
         '--safe',
         action='store_true',
