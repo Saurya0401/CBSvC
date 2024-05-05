@@ -170,7 +170,7 @@ def main():
     try:
         world = client.get_world()
         traffic_manager = client.get_trafficmanager(args.tm_port)
-        
+
         if args.aggression:
             traffic_manager.set_global_distance_to_leading_vehicle(random.random_sample() + 1)
         else:
@@ -263,10 +263,7 @@ def main():
         if args.aggression:
             all_vehicle_actors = world.get_actors(vehicles_list)
             for vehicle_actor in all_vehicle_actors:
-                lane_change = random.random_sample() < 0.5
-                ignore_light = random.random_sample() < 0.5
-                ignore_signs = random.random_sample() < 0.5
-                overspeed = random.random_sample() < 0.5
+                lane_change, ignore_light, ignore_signs, overspeed = [random.random_sample() < 0.5 for _ in range(4)]
                 if lane_change:
                     traffic_manager.force_lane_change(vehicle_actor, random.random_sample() < 0.5)
                 if ignore_light:
