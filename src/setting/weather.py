@@ -8,7 +8,6 @@ import argparse
 import glob
 import os
 import sys
-import time
 import logging
 from enum import Enum, auto
 
@@ -130,24 +129,10 @@ if __name__ == '__main__':
 
     client = carla.Client(args.host, args.port)
     client.set_timeout(10.0)
+    world = client.get_world()
+    weather_man = WeatherManager(world)
+    weather_man.set_weather(WeatherType[args.weather.upper()])
+    weather_man.set_time_of_day(TimeOfDay[args.time.upper()])
+    weather_man.apply_settings()
 
-    try:
-        try:
-            world = client.get_world()
-            weather_man = WeatherManager(world)
-            weather_man.set_weather(WeatherType[args.weather.upper()])
-            weather_man.set_time_of_day(TimeOfDay[args.time.upper()])
-            weather_man.apply_settings()
-            while True:
-                world.tick()
-        finally:
-            settings = world.get_settings()
-            settings.synchronous_mode = False
-            settings.no_rendering_mode = False
-            settings.fixed_delta_seconds = None
-            world.apply_settings(settings)
-            time.sleep(0.5)
-    except KeyboardInterrupt:
-        pass
-    finally:
-        logging.info('Done.')
+    world.wait_for_tick()
