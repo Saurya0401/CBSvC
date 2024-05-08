@@ -33,7 +33,7 @@ CARLA can be used to simulate complex driving scenarios incorporating several va
 * * *
 
 ### Preliminary Design
-![System Design](/CBSvC/assets/images/system_design.jpg)
+![System Design](/CBSvC/assets/images/system_design.png)
 
 This project utilizes a Logitech G920 steering wheel and pedals control for driver input. Biometrics data is provided by a Zephyr bioharness strapped to the driver.
 
