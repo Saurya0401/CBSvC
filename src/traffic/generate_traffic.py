@@ -267,9 +267,9 @@ def main():
                 if lane_change:
                     traffic_manager.force_lane_change(vehicle_actor, random.random_sample() < 0.5)
                 if ignore_light:
-                    traffic_manager.ignore_lights_percentage(vehicle_actor, 70.0)
+                    traffic_manager.ignore_lights_percentage(vehicle_actor, 30.0)
                 if ignore_signs:
-                    traffic_manager.ignore_signs_percentage(vehicle_actor, 70.0)
+                    traffic_manager.ignore_signs_percentage(vehicle_actor, 30.0)
                 if overspeed:
                     traffic_manager.vehicle_percentage_speed_difference(vehicle_actor, -20.0)
 
