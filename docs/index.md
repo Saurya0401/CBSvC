@@ -32,7 +32,8 @@ CARLA can be used to simulate complex driving scenarios incorporating several va
 
 * * *
 
-### Preliminary Design
+### Preliminary Design and Results
+#### System Design
 ![System Design](/CBSvC/assets/images/system_design.png)
 
 This project utilizes a Logitech G920 steering wheel and pedals control for driver input. Biometrics data is provided by a Zephyr bioharness strapped to the driver.
@@ -40,6 +41,15 @@ This project utilizes a Logitech G920 steering wheel and pedals control for driv
 Custom traffic scenarios are constructed in CARLA. These scenarios spawn traffic vehicles with custom behavior, such as aggressive driving, and in different weather conditions.
 
 The idea is to evaluate the driver's reaction to various driving scenarios by analyzing data from the ego vehicle and the driver's biometrics.
+
+#### Sample Results
+| ![Running Red Light Reaction](/CBSvC/assets/images/running_red_light_reaction.png) |
+|:--:| 
+| *Driver's reaction to witnessing a vehicle running a red light* |
+
+| ![Overspeeding Reaction](/CBSvC/assets/images/overspeeding_reaction.png) |
+|:--:| 
+| *Driver's reaction to witnessing a vehicle running a red light* |
 
 * * *
 
