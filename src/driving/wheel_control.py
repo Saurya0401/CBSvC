@@ -29,6 +29,7 @@ from __future__ import print_function
 import glob
 import os
 import sys
+import math
 
 try:
     sys.path.append(glob.glob('../carla/dist/carla-*%d.%d-%s.egg' % (
@@ -56,7 +57,7 @@ import math
 import random
 import re
 import weakref
-
+import time
 if sys.version_info >= (3, 0):
 
     from configparser import ConfigParser
@@ -230,7 +231,8 @@ class DualControl(object):
         self._joystick.init()
 
         self._parser = ConfigParser()
-        self._parser.read('wheel_config.ini')
+        #self._parser.read('wheel_config.ini')
+        self._parser.read("D:/CARLA_0.9.14/WindowsNoEditor/Plugins/telecarla/telecarla_manual_control/config/wheel_config2.ini")
         self._steer_idx = int(
             self._parser.get('G29 Racing Wheel', 'steering_wheel'))
         self._throttle_idx = int(
@@ -398,6 +400,13 @@ class HUD(object):
         self._show_info = True
         self._info_text = []
         self._server_clock = pygame.time.Clock()
+        self.prev_time, self.prev_speed = 0, 0
+        self.speed_file = 'time_and_speed.csv'
+        self.coll_file = 'time_and_coll.txt'
+        with open(self.speed_file, 'w') as f:
+            f.write("time,speed\n")
+        with open(self.coll_file, 'w'):
+            pass
 
     def on_world_tick(self, timestamp):
         self._server_clock.tick()
@@ -463,6 +472,11 @@ class HUD(object):
                     break
                 vehicle_type = get_actor_display_name(vehicle, truncate=22)
                 self._info_text.append('% 4dm %s' % (d, vehicle_type))
+                      
+        with open(self.speed_file, 'a') as f:
+            string = f'{datetime.timedelta(seconds=int(self.simulation_time))},{3.6 * math.sqrt(v.x**2 + v.y**2 + v.z**2):.0f}\n'
+            f.write(string)
+            self.prev_time = int(self.simulation_time)
 
     def toggle_info(self):
         self._show_info = not self._show_info
@@ -775,7 +789,7 @@ def game_loop(args):
     world = None
 
     try:
-        client = carla.Client(args.host, args.port)
+        client = carla.Client('127.0.0.1', 2000)
         client.set_timeout(2.0)
 
         display = pygame.display.set_mode(
@@ -794,6 +808,11 @@ def game_loop(args):
             world.tick(clock)
             world.render(display)
             pygame.display.flip()
+            # with open('Ego_Vehicle_Velocity.txt', 'a') as f:
+            #     v = world.player.get_velocity()
+            #     speed = math.sqrt((v.x**2)+(v.y**2)+(v.z**2))
+            #     f.write(str(speed))
+            #     f.write('\n')
 
     finally:
 
@@ -861,4 +880,5 @@ def main():
 
 
 if __name__ == '__main__':
+
     main()
