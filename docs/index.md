@@ -43,13 +43,11 @@ Custom traffic scenarios are constructed in CARLA. These scenarios spawn traffic
 The idea is to evaluate the driver's reaction to various driving scenarios by analyzing data from the ego vehicle and the driver's biometrics.
 
 #### Sample Results
-| ![Running Red Light Reaction](/CBSvC/assets/images/running_red_light_reaction.png) |
-|:--:| 
-| *Driver's reaction to witnessing a vehicle running a red light* |
+![Running Red Light Reaction](/CBSvC/assets/images/running_red_light_reaction.png)<br>
+*Driver's reaction to witnessing a vehicle running a red light*
 
-| ![Overspeeding Reaction](/CBSvC/assets/images/overspeeding_reaction.png) |
-|:--:| 
-| *Driver's reaction to witnessing a vehicle running a red light* |
+![Overspeeding Reaction](/CBSvC/assets/images/overspeeding_reaction.png)<br>
+*Driver's reaction to witnessing a vehicle overspeeding*
 
 * * *
 
