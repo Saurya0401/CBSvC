@@ -401,10 +401,10 @@ class HUD(object):
         self._info_text = []
         self._server_clock = pygame.time.Clock()
         self.prev_time, self.prev_speed = 0, 0
-        self.speed_file = 'time_and_speed.txt'
+        self.speed_file = 'time_and_speed.csv'
         self.coll_file = 'time_and_coll.txt'
-        with open(self.speed_file, 'w'):
-            pass
+        with open(self.speed_file, 'w') as f:
+            f.write("time,speed\n")
         with open(self.coll_file, 'w'):
             pass
 
@@ -476,7 +476,7 @@ class HUD(object):
         with open(self.speed_file, 'a') as f:
             # if (math.floor(self.simulation_time) > self.prev_time + 1) or self.prev_time == 0:
                 # print(self.simulation_time)
-            string = f'{self._info_text[5]} and {self._info_text[7]}\n'
+            string = f'{datetime.timedelta(seconds=int(self.simulation_time))},{"%.0f" % (3.6 * math.sqrt(v.x**2 + v.y**2 + v.z**2))}\n'
             f.write(string)
             self.prev_time = int(self.simulation_time)
 
