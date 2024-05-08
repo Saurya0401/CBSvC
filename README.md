@@ -25,12 +25,35 @@ We would like to analyze the effects, if any, of drivers with varying behaviors 
 
 ## Hardware and Software Requirements ##
 Hardware requirements include:
-- Driving steering wheel, pedals, seat, and monitors
+
+- G920 Driving wheel
+- GTrack Driving seat
+- Logitech Driving pedals
+- 50’ TV
+- PC installed with CarlaUE4
 - Human Biometric reader belt
-- PC to support the software
+
+![Setup](blob/Setup.png?raw=true)
+
 Software requirements include
 - CARLA Simulator
 - Matlab
+## Goal ##
+- Research and implement traffic scenarios on CARLA simulator.
+- Gather data on human biometrics, such as heart rate and stress levels, along with vehicular metrics like speed and acceleration, to analyze and classify driving behavior.
+- Case Study on driving behaviour across various traffic conditions.
+
+## Driving Scenarios ##
+* Default environment -  control sample
+* Driving at Night
+* Vehicles Overspeeding
+* Distracted Vehicles
+    * Ignoring Traffic Lights
+    * Ignoring Stop Signs
+* Congested Driving
+    * Overcrowded roads
+    * Overcrowded intersections
+
 ## Team Members Responsibilities ##
 ### Puya: ### 
 Data collection configuration, Test drive of the simulation, Setting up simulation constraints
@@ -46,7 +69,7 @@ Data collection configuration, Test drive of the simulation, Setting up simulati
 ## Project Timeline ##
 
 
-![Timeline](blob/Timeline2.jpg?raw=true)
+![Timeline](blob/Timeline3.png?raw=true)
 
 ## References ##
 <a id="1">[1]</a>  Y. Xia, M. Geng, Y. Chen, B. Zhang, Z. Gao, and X. (M.) Chen, "Understanding common human driving semantics for autonomous vehicles," IEEE Transactions on Intelligent Transportation Systems, 2023.
