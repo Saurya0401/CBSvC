@@ -55,11 +55,12 @@ def main():
         # initialize vehicles and pedestrians
         traffic_gen = TrafficGenerator(client, world, traffic_manager, args)
         traffic_gen.set_global_tm_settings()
-        traffic_gen.spawn_vehicles()
-        if args.aggression:
-            traffic_gen.set_aggressive_behavior()
-        if not args.disable_car_lights:
-            traffic_gen.set_automatic_vehicle_lights()
+        if not args.congestion:
+            traffic_gen.spawn_vehicles()
+            if args.aggression:
+                traffic_gen.set_aggressive_behavior_all()
+            if not args.disable_car_lights:
+                traffic_gen.set_automatic_vehicle_lights()
         traffic_gen.spawn_walkers()
         logging.info(
             'Spawned %d vehicles and %d walkers, press Ctrl+C to exit.',
@@ -80,6 +81,10 @@ def main():
 
         while True:
             world.tick()
+            if args.congestion:
+                vehicle = traffic_gen.spawn_congestion_vehicle()
+                if vehicle:
+                    weather_man.set_car_lights(vehicle)
 
     finally:
         settings = world.get_settings()
@@ -126,12 +131,17 @@ if __name__ == '__main__':
         metavar='W',
         default=10,
         type=int,
-        help='Number of walkers (default: 10)')
+        help='Number of walkers (default: %(default)s)')
     argparser.add_argument(
         '--aggression',
         action='store_true',
         default=False,
         help='Enable aggressive driving')
+    argparser.add_argument(
+        '--congestion',
+        action='store_true',
+        default=False,
+        help='Enable traffic congestion along fixed routes')
     argparser.add_argument(
         '--weather',
         choices=['clear', 'foggy', 'rainy'],

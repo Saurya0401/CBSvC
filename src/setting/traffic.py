@@ -43,6 +43,16 @@ class TrafficGenerator:
         self.n_vehicles = self.args.number_of_vehicles
         self.n_walkers = self.args.number_of_walkers
         self.spawn_actor = carla.command.SpawnActor
+        self.spawn_points = self.world.get_map().get_spawn_points()
+
+        # Congestion variables
+        self.route_1_indices = [129, 28, 124, 33, 97, 119, 58, 154, 147]
+        self.route_2_indices = [21, 76, 38, 34, 90, 3]
+        self.route_1 = [self.spawn_points[i].location for i in self.route_1_indices]
+        self.route_2 = [self.spawn_points[i].location for i in self.route_2_indices]
+        self.alt = False
+        self.spawn_delay = 20
+        self.counter = self.spawn_delay
 
         self.vehicles_list = []
 
@@ -79,16 +89,38 @@ class TrafficGenerator:
         if self.args.seed is not None:
             self.traffic_manager.set_random_device_seed(self.args.seed)
 
+    def spawn_congestion_vehicle(self):
+        n_congestion_vehicles = len(self.world.get_actors().filter('*vehicle*'))
+        if self.counter == 0 and n_congestion_vehicles < 200:
+            spawn_point = self.spawn_points[32] if self.alt else self.spawn_points[149]
+            vehicle = self.world.try_spawn_actor(random.choice(self.vehicle_blueprints), spawn_point)
+            if vehicle:
+                vehicle.set_autopilot(True)
+                self.traffic_manager.auto_lane_change(vehicle, False)
+                if self.args.aggression:
+                    self.set_aggressive_behavior(vehicle)
+                if not self.args.disable_car_lights:
+                    self.traffic_manager.update_vehicle_lights(vehicle, True)
+                path = self.route_1 if self.alt else self.route_2
+                self.traffic_manager.set_path(vehicle, path)
+                self.alt = not self.alt
+                self.vehicles_list.append(vehicle.id)
+                logging.info('Spawned congestion vehicle (current: %d vehicles)', n_congestion_vehicles)
+                return vehicle
+            self.counter = self.spawn_delay
+        else:
+            self.counter -= 1 if self.counter > 0 else 0
+        return None
+
     def spawn_vehicles(self):
         if self.args.safe:
             # spawns only cars cus apparently those are less prone to accidents
             self.vehicle_blueprints = [x for x in self.vehicle_blueprints if x.get_attribute('base_type') == 'car']
 
         self.vehicle_blueprints = sorted(self.vehicle_blueprints, key=lambda bp: bp.id)
-        spawn_points = self.world.get_map().get_spawn_points()
-        n_spawn_points = len(spawn_points)
+        n_spawn_points = len(self.spawn_points)
         if self.n_vehicles < n_spawn_points:
-            random.shuffle(spawn_points)
+            random.shuffle(self.spawn_points)
         elif self.n_vehicles > n_spawn_points:
             msg = 'requested %d vehicles, but could only find %d spawn points'
             logging.warning(msg, self.n_vehicles, n_spawn_points)
@@ -96,7 +128,7 @@ class TrafficGenerator:
 
         batch = []
         hero = self.args.hero
-        for n, transform in enumerate(spawn_points):
+        for n, transform in enumerate(self.spawn_points):
             if n >= self.args.number_of_vehicles:
                 break
             blueprint = random.choice(self.vehicle_blueprints)
@@ -126,28 +158,31 @@ class TrafficGenerator:
 
         logging.info('Spawned %d vehicles', len(self.vehicles_list))
 
-    def set_aggressive_behavior(self):
+    def set_aggressive_behavior(self, vehicle_actor):
+        # Carla's example sets leading distance on a per vehicle basis instead of globally
+        # see: https://carla.readthedocs.io/en/latest/adv_traffic_manager/#configuring-autopilot-behavior
+        # leading distance here is set to a value between 0 and 1
+        lead_dist = random.random_sample()
+        self.traffic_manager.distance_to_leading_vehicle(vehicle_actor, lead_dist)
+        logging.info('Vehicle "%s" distance to lead vehicle set to %.2f m', self.get_vehicle_desc(vehicle_actor), lead_dist)
+        lane_change, ignore_light, ignore_signs, overspeed = [self.coin_toss() for _ in range(4)]
+        if lane_change:
+            self.traffic_manager.force_lane_change(vehicle_actor, self.coin_toss())
+            logging.info('Vehicle "%s" has force lane change behavior', self.get_vehicle_desc(vehicle_actor))
+        if ignore_light:
+            self.traffic_manager.ignore_lights_percentage(vehicle_actor, TrafficGenerator.IGNORE_LIGHTS_PERCENT)
+            logging.info('Vehicle "%s" has a %.1f percent chance of ignoring traffic lights', self.get_vehicle_desc(vehicle_actor), TrafficGenerator.IGNORE_LIGHTS_PERCENT)
+        if ignore_signs:
+            self.traffic_manager.ignore_signs_percentage(vehicle_actor, TrafficGenerator.IGNORE_SIGNS_PERCENT)
+            logging.info('Vehicle "%s" has a %.1f percent chance of ignoring traffic signs', self.get_vehicle_desc(vehicle_actor), TrafficGenerator.IGNORE_SIGNS_PERCENT)
+        if overspeed:
+            self.traffic_manager.vehicle_percentage_speed_difference(vehicle_actor, TrafficGenerator.SPEED_DIFF_PERCENT)
+            logging.info('Vehicle "%s" will drive %.1f percent faster than the speed limit', self.get_vehicle_desc(vehicle_actor), -1*TrafficGenerator.SPEED_DIFF_PERCENT)
+
+    def set_aggressive_behavior_all(self):
         all_vehicle_actors = self.world.get_actors(self.vehicles_list)
         for vehicle_actor in all_vehicle_actors:
-            # Carla's example sets leading distance on a per vehicle basis instead of globally
-            # see: https://carla.readthedocs.io/en/latest/adv_traffic_manager/#configuring-autopilot-behavior
-            # leading distance here is set to a value between 0 and 1
-            lead_dist = random.random_sample()
-            self.traffic_manager.distance_to_leading_vehicle(vehicle_actor, lead_dist)
-            logging.info('Vehicle "%s" distance to lead vehicle set to %.2f m', self.get_vehicle_desc(vehicle_actor), lead_dist)
-            lane_change, ignore_light, ignore_signs, overspeed = [self.coin_toss() for _ in range(4)]
-            if lane_change:
-                self.traffic_manager.force_lane_change(vehicle_actor, self.coin_toss())
-                logging.info('Vehicle "%s" has force lane change behavior', self.get_vehicle_desc(vehicle_actor))
-            if ignore_light:
-                self.traffic_manager.ignore_lights_percentage(vehicle_actor, TrafficGenerator.IGNORE_LIGHTS_PERCENT)
-                logging.info('Vehicle "%s" has a %.1f percent chance of ignoring traffic lights', self.get_vehicle_desc(vehicle_actor), TrafficGenerator.IGNORE_LIGHTS_PERCENT)
-            if ignore_signs:
-                self.traffic_manager.ignore_signs_percentage(vehicle_actor, TrafficGenerator.IGNORE_SIGNS_PERCENT)
-                logging.info('Vehicle "%s" has a %.1f percent chance of ignoring traffic signs', self.get_vehicle_desc(vehicle_actor), TrafficGenerator.IGNORE_SIGNS_PERCENT)
-            if overspeed:
-                self.traffic_manager.vehicle_percentage_speed_difference(vehicle_actor, TrafficGenerator.SPEED_DIFF_PERCENT)
-                logging.info('Vehicle "%s" will drive %.1f percent faster than the speed limit', self.get_vehicle_desc(vehicle_actor), -1*TrafficGenerator.SPEED_DIFF_PERCENT)
+            self.set_aggressive_behavior(vehicle_actor)
 
     def set_automatic_vehicle_lights(self):
         """Set automatic vehicle lights update if specified"""
@@ -166,18 +201,18 @@ class TrafficGenerator:
             random.seed(self.args.seedw)
 
         # 1. take all the random locations to spawn
-        spawn_points = []
+        w_spawn_points = []
         for _ in range(self.n_walkers):
             spawn_point = carla.Transform()
             loc = self.world.get_random_location_from_navigation()
             if loc is not None:
                 spawn_point.location = loc
-                spawn_points.append(spawn_point)
+                w_spawn_points.append(spawn_point)
 
         # 2. we spawn the walker object
         batch = []
         walker_speed = []
-        for spawn_point in spawn_points:
+        for spawn_point in w_spawn_points:
             walker_bp = random.choice(self.walker_blueprints)
             # set as not invincible
             if walker_bp.has_attribute('is_invincible'):
