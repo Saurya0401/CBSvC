@@ -400,8 +400,8 @@ class HUD(object):
         self._show_info = True
         self._info_text = []
         self._server_clock = pygame.time.Clock()
-        self.speed_file = f'time_and_speed_{name}.csv'
-        self.coll_file = f'time_and_coll_{name}.txt'
+        self.speed_file = f'src/logs/time_and_speed_{name}.csv'
+        self.coll_file = f'src/logs/time_and_coll_{name}.txt'
         with open(self.speed_file, 'w') as f:
             f.write('time_seconds,time,speed\n')
         with open(self.coll_file, 'w') as f:
