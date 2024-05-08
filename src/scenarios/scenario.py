@@ -2,7 +2,7 @@
 # pylint: skip-file
 
 """
-Scenario 1: Aggresive driver behavior in different types of weather
+Generate various taffic scenarios
 """
 
 import argparse
