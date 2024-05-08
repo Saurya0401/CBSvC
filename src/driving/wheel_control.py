@@ -383,7 +383,7 @@ class DualControl(object):
 
 
 class HUD(object):
-    def __init__(self, width, height):
+    def __init__(self, width, height, name):
         self.dim = (width, height)
         font = pygame.font.Font(pygame.font.get_default_font(), 20)
         font_name = 'courier' if os.name == 'nt' else 'mono'
@@ -400,13 +400,12 @@ class HUD(object):
         self._show_info = True
         self._info_text = []
         self._server_clock = pygame.time.Clock()
-        self.prev_time, self.prev_speed = 0, 0
-        self.speed_file = 'time_and_speed.csv'
-        self.coll_file = 'time_and_coll.txt'
+        self.speed_file = f'time_and_speed_{name}.csv'
+        self.coll_file = f'time_and_coll_{name}.txt'
         with open(self.speed_file, 'w') as f:
-            f.write("time,speed\n")
-        with open(self.coll_file, 'w'):
-            pass
+            f.write('time_seconds,time,speed\n')
+        with open(self.coll_file, 'w') as f:
+            f.write('time_seconds,time,collision\n')
 
     def on_world_tick(self, timestamp):
         self._server_clock.tick()
@@ -418,9 +417,11 @@ class HUD(object):
         self._notifications.tick(world, clock)
         if not self._show_info:
             return
+        timestamp = datetime.timedelta(seconds=int(self.simulation_time))
         t = world.player.get_transform()
         v = world.player.get_velocity()
         c = world.player.get_control()
+        speed = 3.6 * math.sqrt(v.x**2 + v.y**2 + v.z**2)
         heading = 'N' if abs(t.rotation.yaw) < 89.5 else ''
         heading += 'S' if abs(t.rotation.yaw) > 90.5 else ''
         heading += 'E' if 179.5 > t.rotation.yaw > 0.5 else ''
@@ -436,9 +437,9 @@ class HUD(object):
             '',
             'Vehicle: % 20s' % get_actor_display_name(world.player, truncate=20),
             'Map:     % 20s' % world.world.get_map().name.split('/')[-1],
-            'Simulation time: % 12s' % datetime.timedelta(seconds=int(self.simulation_time)),
+            'Simulation time: % 12s' % timestamp,
             '',
-            'Speed:   % 15.0f km/h' % (3.6 * math.sqrt(v.x**2 + v.y**2 + v.z**2)),
+            'Speed:   % 15.0f km/h' % speed,
             u'Heading:% 16.0f\N{DEGREE SIGN} % 2s' % (t.rotation.yaw, heading),
             'Location:% 20s' % ('(% 5.1f, % 5.1f)' % (t.location.x, t.location.y)),
             'GNSS:% 24s' % ('(% 2.6f, % 3.6f)' % (world.gnss_sensor.lat, world.gnss_sensor.lon)),
@@ -473,10 +474,9 @@ class HUD(object):
                 vehicle_type = get_actor_display_name(vehicle, truncate=22)
                 self._info_text.append('% 4dm %s' % (d, vehicle_type))
                       
-        with open(self.speed_file, 'a') as f:
-            string = f'{datetime.timedelta(seconds=int(self.simulation_time))},{3.6 * math.sqrt(v.x**2 + v.y**2 + v.z**2):.0f}\n'
-            f.write(string)
-            self.prev_time = int(self.simulation_time)
+        with open(self.speed_file, 'a') as speed_f, open(self.coll_file, 'a') as coll_f:
+            speed_f.write(f'{timestamp.seconds},{timestamp},{speed:.0f}\n')
+            coll_f.write(f'{timestamp.seconds},{timestamp},{collision}\n')
 
     def toggle_info(self):
         self._show_info = not self._show_info
@@ -796,7 +796,7 @@ def game_loop(args):
             (args.width, args.height),
             pygame.HWSURFACE | pygame.DOUBLEBUF)
 
-        hud = HUD(args.width, args.height)
+        hud = HUD(args.width, args.height, args.name)
         world = World(client.get_world(), hud, args.filter)
         controller = DualControl(world, args.autopilot)
 
@@ -850,6 +850,10 @@ def main():
         '-a', '--autopilot',
         action='store_true',
         help='enable autopilot')
+    argparser.add_argument(
+        '--name',
+        default=datetime.datetime.now().strftime("%m-%d_%H%M"),
+        help='unique name for log files (default: run timestamp)')
     argparser.add_argument(
         '--res',
         metavar='WIDTHxHEIGHT',
