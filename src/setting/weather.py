@@ -31,6 +31,7 @@ class WeatherType(Enum):
     CLEAR = auto()
     FOGGY = auto()
     RAINY = auto()
+    CLOUDY = auto()
 
 
 class WeatherManager:
@@ -43,6 +44,7 @@ class WeatherManager:
             self.vehicles = []
         self.weather = self.world.get_weather()
         self.clear_weather = carla.WeatherParameters.ClearNoon
+        self.cloudy_weather = carla.WeatherParameters.CloudyNoon
         self.rainy_weather = carla.WeatherParameters.HardRainNoon
         self.foggy_weather = carla.WeatherParameters(
             sun_azimuth_angle=self.clear_weather.sun_azimuth_angle,
@@ -82,6 +84,8 @@ class WeatherManager:
             self.current_weather = self.foggy_weather
         elif self.weather_type == WeatherType.RAINY:
             self.current_weather = self.rainy_weather
+        elif self.weather_type == WeatherType.CLOUDY:
+            self.current_weather = self.cloudy_weather
         else:
             raise ValueError(f'Invalid weather type "{str(weather_type)}"')
 
@@ -117,7 +121,7 @@ if __name__ == '__main__':
         help='TCP port to listen to (default: %(default)s)')
     argparser.add_argument(
         '--weather',
-        choices=['clear', 'foggy', 'rainy'],
+        choices=['clear', 'cloudy', 'foggy', 'rainy'],
         default='clear',
         help='Set weather type (default: %(default)s)')
     argparser.add_argument(
