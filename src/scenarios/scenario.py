@@ -33,8 +33,6 @@ def set_global_settings(world, traffic_manager):
     if not settings.synchronous_mode:
         settings.synchronous_mode = True
         settings.fixed_delta_seconds = 0.05
-    if args.no_rendering:
-        settings.no_rendering_mode = True
     world.apply_settings(settings)
 
 
@@ -195,11 +193,6 @@ if __name__ == '__main__':
         action='store_true',
         default=False,
         help='Set one of the vehicles as hero')
-    argparser.add_argument(
-        '--no-rendering',
-        action='store_true',
-        default=False,
-        help='Activate no rendering mode')
 
     args = argparser.parse_args()
 
