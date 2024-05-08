@@ -57,20 +57,26 @@ class WeatherManager:
         self.weather_type = None
         self.time_of_day = None
 
-    def set_car_lights(self, weather_type):
+    def set_car_lights(self, vehicle):
+        if not self.weather_type:
+            logging.error("Cannot set car lights (weather not set)")
+            return
+        light_mask = vehicle.get_light_state()
+        if self.weather_type == WeatherType.FOGGY:
+            light_mask |= carla.VehicleLightState.Fog | carla.VehicleLightState.LowBeam
+        elif self.weather_type == WeatherType.RAINY:
+            light_mask |= carla.VehicleLightState.LowBeam
+        vehicle.set_light_state(carla.VehicleLightState(light_mask))
+
+    def set_car_lights_all(self):
         """Set car lights for foggy and rainy weather"""
         if not self.vehicles:
             logging.warning("Cannot set car lights (no vehicle info)")
         for ve in self.vehicles:
-            light_mask = ve.get_light_state()
-            if weather_type == WeatherType.FOGGY:
-                light_mask |= carla.VehicleLightState.Fog | carla.VehicleLightState.LowBeam
-            elif weather_type == WeatherType.RAINY:
-                light_mask |= carla.VehicleLightState.LowBeam
-            ve.set_light_state(carla.VehicleLightState(light_mask))
+            self.set_car_lights(ve)
 
     def apply_settings(self):
-        self.set_car_lights(self.weather_type)
+        self.set_car_lights_all()
         self.world.set_weather(self.current_weather)
         logging.info(
             'Weather set to %s %s', self.weather_type.name.lower(), self.time_of_day.name.lower()
