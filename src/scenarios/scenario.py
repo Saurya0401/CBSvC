@@ -69,7 +69,7 @@ def main():
         )
 
         # initialize weather
-        weather_man = WeatherManager(world, traffic_gen.vehicles_list)
+        weather_man = WeatherManager(world, world.get_actors(traffic_gen.vehicles_list))
         weather_man.set_weather(WeatherType[args.weather.upper()])
         weather_man.set_time_of_day(TimeOfDay[args.time.upper()])
         weather_man.apply_settings()

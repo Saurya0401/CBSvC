@@ -36,12 +36,9 @@ class WeatherType(Enum):
 
 class WeatherManager:
 
-    def __init__(self, world, vehicles_list=None):
+    def __init__(self, world, vehicles=None):
         self.world = world
-        if vehicles_list:
-            self.vehicles = self.world.get_actors(vehicles_list)
-        else:
-            self.vehicles = []
+        self.vehicles = vehicles or []
         self.weather = self.world.get_weather()
         self.clear_weather = carla.WeatherParameters.ClearNoon
         self.cloudy_weather = carla.WeatherParameters.CloudyNoon
@@ -109,6 +106,18 @@ class WeatherManager:
                 self.current_weather.fog_density += 20
         else:
             raise ValueError(f'Invalid time of day "{str(time_of_day)}"')
+
+
+WEATHER_PRESETS = [
+    ('clear noon', WeatherType.CLEAR, TimeOfDay.NOON),
+    ('cloudy noon', WeatherType.CLOUDY, TimeOfDay.NOON),
+    ('rainy noon', WeatherType.RAINY, TimeOfDay.NOON),
+    ('foggy noon', WeatherType.FOGGY, TimeOfDay.NOON),
+    ('clear night', WeatherType.CLEAR, TimeOfDay.NIGHT),
+    ('cloudy night', WeatherType.CLOUDY, TimeOfDay.NIGHT),
+    ('rainy night', WeatherType.RAINY, TimeOfDay.NIGHT),
+    ('foggy night', WeatherType.FOGGY, TimeOfDay.NIGHT),
+]
 
 
 if __name__ == '__main__':
