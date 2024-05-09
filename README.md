@@ -58,13 +58,13 @@ Software requirements include
 ### Puya: ### 
 Data collection configuration, Test drive of the simulation, Setting up simulation constraints
 ### Yasamin: ### 
-Research and Design algorithms for the analysis required on collected data, Test drive the simulation, Set up simulation constraints
+Research and Design algorithms for the analysis required on collected data, Test drive the simulation, Set up simulation constraints.
 ### Ruchi: ### 
 Documentation of Data collection from simulation, Test drive of the simulation, and Organization of the collected data to be analyzed. 
 ### Sauryadeep: ###
-Research and Design algorithms for the analysis required on collected data, Test drive the simulation, Setting up simulation constraints
+Research and Design algorithms for the analysis required on collected data, Test drive the simulation, Setting up simulation constraints.
 ### Aniruddha: ###
-Data collection configuration, Test drive of the simulation, Setting up simulation constraints
+Data collection configuration, Test drive of the simulation, Setting up simulation constraints.
 
 ## Project Timeline ##
 
