@@ -66,7 +66,8 @@ class ZephyrStream:
         for arg in args:
             self.gsr_val = arg
 
-def monitor_and_send_biometrics(zephyr_stream):
+def monitor_and_send_biometrics(child_conn):
+    zephyr_stream = ZephyrStream(child_conn)
     while True:
         if zephyr_stream.child_conn.poll():
             zephyr_stream.child_conn.close()
@@ -91,8 +92,7 @@ def monitor_and_send_biometrics(zephyr_stream):
 if __name__ == '__main__':
     logging.basicConfig(format='%(levelname)s: %(message)s', level=logging.INFO)
     parent_conn, child_conn = Pipe()
-    zephyr_stream = ZephyrStream(child_conn)
-    p = Process(target=monitor_and_send_biometrics, args=(zephyr_stream,))
+    p = Process(target=monitor_and_send_biometrics, args=(child_conn,))
     try:
         p.start()
         print(parent_conn.recv())   # prints "Hello"
