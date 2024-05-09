@@ -66,33 +66,33 @@ class ZephyrStream:
         for arg in args:
             self.gsr_val = arg
 
-    def monitor_and_send_biometrics(self):
-        while True:
-            if self.child_conn.poll():
-                self.child_conn.close()
-                break
+def monitor_and_send_biometrics(zephyr_stream):
+    while True:
+        if zephyr_stream.child_conn.poll():
+            zephyr_stream.child_conn.close()
+            break
 
-            live = self.get_biometrics(self.gen_inlet, self.rr_inlet)
-            osc_process()
+        live = zephyr_stream.get_biometrics(zephyr_stream.gen_inlet, zephyr_stream.rr_inlet)
+        osc_process()
 
-            live_stress = np.append(live, self.gsr_val)
-            hr = str(live_stress[0])
-            br = str(live_stress[1])
-            gsr = str(live_stress[2])
+        live_stress = np.append(live, zephyr_stream.gsr_val)
+        hr = str(live_stress[0])
+        br = str(live_stress[1])
+        gsr = str(live_stress[2])
 
-            # send data to CARLA
-            data = [hr, br, gsr]
-            logging.debug('HR: %s, BR: %s, GSR: %s', str(hr), str(br), str(gsr))
-            self.child_conn.send(data)
+        # send data to CARLA
+        data = [hr, br, gsr]
+        logging.debug('HR: %s, BR: %s, GSR: %s', str(hr), str(br), str(gsr))
+        zephyr_stream.child_conn.send(data)
 
-        osc_terminate()
+    osc_terminate()
 
 
 if __name__ == '__main__':
     logging.basicConfig(format='%(levelname)s: %(message)s', level=logging.INFO)
     parent_conn, child_conn = Pipe()
     zephyr_stream = ZephyrStream(child_conn)
-    p = Process(target=zephyr_stream.monitor_and_send_biometrics)
+    p = Process(target=monitor_and_send_biometrics, args=(zephyr_stream,))
     try:
         p.start()
         print(parent_conn.recv())   # prints "Hello"
