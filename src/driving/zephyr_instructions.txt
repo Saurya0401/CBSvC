@@ -1,0 +1,6 @@
+1. Activate pyzephyr environment
+2. Navigate to C:\Users\aicps\WindowsNoEditor\PythonAPI\examples\App_Zephyr_main
+3. Execute run.cmd
+4. Activate carlaenv in a new environment
+5. Navigate to C:\Users\aicps\CBSvC
+5. Execute python -m src.driving.zephyr_stream
