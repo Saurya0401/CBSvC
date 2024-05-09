@@ -1,4 +1,3 @@
-# pylint: skip-file
 """
 CARLA manual control with steering wheel Logitech G920.
 
@@ -7,26 +6,6 @@ Change your wheel_config.ini according to your steering wheel.
 To find out the values of your steering wheel use jstest-gtk in Ubuntu.
 
 """
-
-# find CARLA module
-import glob
-import os
-import sys
-
-try:
-    sys.path.append(glob.glob('../carla/dist/carla-*%d.%d-%s.egg' % (
-        sys.version_info.major,
-        sys.version_info.minor,
-        'win-amd64' if os.name == 'nt' else 'linux-x86_64'))[0])
-except IndexError:
-    pass
-
-
-# imports
-import carla
-
-from carla import ColorConverter as cc
-
 from configparser import ConfigParser
 import argparse
 import collections
@@ -35,6 +14,18 @@ import logging
 import math
 import random
 import weakref
+
+# add CARLA to sys path
+import glob
+import os
+import sys
+try:
+    sys.path.append(glob.glob('../carla/dist/carla-*%d.%d-%s.egg' % (
+        sys.version_info.major,
+        sys.version_info.minor,
+        'win-amd64' if os.name == 'nt' else 'linux-x86_64'))[0])
+except IndexError:
+    pass
 
 try:
     import pygame
@@ -46,9 +37,11 @@ try:
     from multiprocessing import Pipe, Process
     sys.path.append('App_Zephyr_main')
     from zephyr_stream import ZephyrStream
-
 except ImportError as exc:
     raise RuntimeError('Cannot import required libraries') from exc
+
+import carla
+from carla import ColorConverter as cc
 
 from src.driving.zephyr_stream import ZephyrStream
 from src.scenarios.weather import WeatherManager, WEATHER_PRESETS
