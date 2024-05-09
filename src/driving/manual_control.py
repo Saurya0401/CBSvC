@@ -36,7 +36,7 @@ try:
     import numpy as np
     from multiprocessing import Pipe, Process
     sys.path.append('App_Zephyr_main')
-    from zephyr_stream import ZephyrStream
+    from src.driving.zephyr_stream import ZephyrStream
 except ImportError as exc:
     raise RuntimeError('Cannot import required libraries') from exc
 

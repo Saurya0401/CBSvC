@@ -3,6 +3,7 @@ Provides zephyr biometrics data stream
 """
 
 import logging
+from multiprocessing import Pipe, Process
 
 # Bioharness
 from pylsl import StreamInlet, resolve_streams
@@ -16,7 +17,7 @@ import numpy as np
 
 class ZephyrStream:
 
-    def __init__(self, child_conn, ip='172.20.10.4', port=8000):
+    def __init__(self, child_conn, ip='127.0.0.1', port=8000):
         self.child_conn = child_conn
         self.ip = ip
         self.port = port
@@ -89,3 +90,11 @@ class ZephyrStream:
 
 if __name__ == '__main__':
     logging.basicConfig(format='%(levelname)s: %(message)s', level=logging.INFO)
+    parent_conn, child_conn = Pipe()
+    zephyr_stream = ZephyrStream(child_conn)
+    p = Process(target=zephyr_stream.monitor_and_send_biometrics)
+    try:
+        p.start()
+        print(parent_conn.recv())   # prints "Hello"
+    finally: 
+        pass 

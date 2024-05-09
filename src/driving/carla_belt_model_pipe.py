@@ -78,7 +78,7 @@ def start_stream(child_conn):
             gsr_val = arg
 
     osc_startup()
-    IP = '172.20.10.4'
+    IP = '127.0.0.1'
     PORT = 8000
     osc_udp_client(IP, PORT, "udplisten")
     osc_udp_server(IP, PORT, "udpclient")
@@ -200,3 +200,12 @@ def start_stream(child_conn):
         child_conn.send(msg)
 
     osc_terminate()
+
+if __name__ == '__main__':
+    parent_conn,child_conn = Pipe()
+    p = Process(target=start_stream, args=(child_conn,))
+    try:
+        p.start()
+        print(parent_conn.recv())   # prints "Hello"
+    finally: 
+        pass
