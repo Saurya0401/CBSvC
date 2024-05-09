@@ -43,12 +43,38 @@ Custom traffic scenarios are constructed in CARLA. These scenarios spawn traffic
 The idea is to evaluate the driver's reaction to various driving scenarios by analyzing data from the ego vehicle and the driver's biometrics.
 
 #### Sample Results
+![Clear Day Reaction](/CBSvC/assets/images/driving_clear_day.png)<br>
+*Baseline result of driver's reaction in a clear day driving scenario.*
+
+
+
+![Clear Night Reaction](/CBSvC/assets/images/driving_clear_night.png)<br>
+*Driver's reaction in a clear day driving scenario. The driver is more cautious as can be observed from the frequent braking, possibly due to lower visibility at night.*
+
+
+
 ![Running Red Light Reaction](/CBSvC/assets/images/running_red_light_reaction.png)<br>
-*Driver's reaction to witnessing a vehicle running a red light*
+*Driver's reaction to witnessing a vehicle running a red light. The driver has to brake abruptly and stays still for a few moments due to shock. Upon resuming, they drive cautiously at half speed likely because they want to avoid more incidents.*
+
 
 
 ![Overspeeding Reaction](/CBSvC/assets/images/overspeeding_reaction.png)<br>
-*Driver's reaction to witnessing a vehicle overspeeding*
+*Driver's reaction to witnessing a vehicle overspeeding. The driver rapidly decelerates and does not move for while. This could be a natural side effect of the stress induced by the scenario upon the driver.*
+
+
+
+![Ignoring Signs Reaction](/CBSvC/assets/images/ignoring_signs_reaction.png)<br>
+*Driver's reaction to witnessing a vehicle ignoring a stop sign. There is rapid deceleration from 60 kph to a sustained 0 kph for several timestamps. The driver accelerates once more but never reaches 60 kph again. This could be due to the driver driving more cautiously around a vehicle that violates traffic rules.*
+
+
+
+![Driving in Congested Traffic](/CBSvC/assets/images/driving_congested.png)<br>
+*Driver tends to brake a lot more in congested traffic. Post-congestion, the driver tends to accelerate to higher speeds possibly due to frustation induced by the congestion.*
+
+
+
+![Driving in Congested Traffic with Aggresive Drivers](/CBSvC/assets/images/driving_congested_aggressive.png)<br>
+*Aggresive driving can make congestion worse. The driver in this scenario braked more frequently and stayed stuck in traffic for a longer period of time due to an accident caused by aggresive drivers breaking traffic rules.*
 
 * * *
 
