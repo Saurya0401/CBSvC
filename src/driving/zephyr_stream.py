@@ -18,7 +18,6 @@ from osc4py3.as_eventloop import (
     osc_terminate
 )
 from osc4py3 import oscmethod as osm
-import numpy as np
 
 
 gsr_val = 0
@@ -68,14 +67,14 @@ class ZephyrStream:
         hr = gen_sample[2]
         br = gen_sample[3]
         rr = rr_sample[0]
-        return np.array([hr, br, rr])
+        return [hr, br, rr]
 
-def handler_func(self, *args):
-    global gsr_val
+def handler_func(*args):
     for arg in args:
+        global gsr_val
         gsr_val = arg
 
-def monitor_and_send_biometrics(child_conn):
+def monitor_and_send_biometrics(child_conn, debug=False):
     zephyr_stream = ZephyrStream(child_conn)
     while True:
         if zephyr_stream.child_conn.poll():
@@ -85,14 +84,15 @@ def monitor_and_send_biometrics(child_conn):
         live = zephyr_stream.get_biometrics(zephyr_stream.gen_inlet, zephyr_stream.rr_inlet)
         osc_process()
 
-        live_stress = [live[0], live[1], gsr_val]
+        live_stress = [*live[2], gsr_val]
         hr = str(live_stress[0])
         br = str(live_stress[1])
         gsr = str(live_stress[2])
 
         # send data to CARLA
         data = [hr, br, gsr]
-        # print(f'HR: {hr}, BR: {br}, GSR: {gsr}')
+        if debug:
+            print(f'HR: {hr}, BR: {br}, GSR: {gsr}')
         zephyr_stream.child_conn.send(data)
 
     osc_terminate()
@@ -101,7 +101,7 @@ def monitor_and_send_biometrics(child_conn):
 if __name__ == '__main__':
     logging.basicConfig(format='%(levelname)s: %(message)s', level=logging.DEBUG)
     parent_conn, child_conn = Pipe()
-    p = Process(target=monitor_and_send_biometrics, args=(child_conn,))
+    p = Process(target=monitor_and_send_biometrics, args=(child_conn, True))
     try:
         p.start()
         print(str(parent_conn.recv()))
