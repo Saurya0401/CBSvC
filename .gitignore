@@ -160,3 +160,4 @@ cython_debug/
 #.idea/
 
 src/scratch
+src/logs
