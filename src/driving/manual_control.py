@@ -64,8 +64,8 @@ class World:
         self.gnss_sensor = None
         self.camera_manager = None
         self._weather_man = WeatherManager(
-            self.player.get_world(),
-            [act for act in self.player.get_world().get_actors() if "vehicle." in act.type_id]
+            self.world,
+            [act for act in self.world.get_actors() if "vehicle." in act.type_id]
         )
         self._weather_index = 0
         self._actor_filter = actor_filter
@@ -290,7 +290,7 @@ class HUD:
         heading += 'W' if -0.5 > t.rotation.yaw > -179.5 else ''
         colhist = world.collision_sensor.get_collision_history()
         collision = [colhist[x + self.frame - 200] for x in range(0, 200)]
-        max_col = max(1.0, collision)
+        max_col = max(1.0, max(collision))
         collision = [x / max_col for x in collision]
         vehicles = world.world.get_actors().filter('vehicle.*')
         self._info_text = [
@@ -715,7 +715,6 @@ def main():
         except KeyboardInterrupt:
             logging.info('Cancelled by user. Bye!')
     finally:
-        p.terminate()
         p.join()
         logging.info('Zephyr stream terminated.')
 
@@ -738,6 +737,10 @@ if __name__ == '__main__':
         default=2000,
         type=int,
         help='TCP port to listen to (default: %(default)s)')
+    argparser.add_argument(
+        '--name',
+        default=datetime.datetime.now().strftime("%m-%d_%H%M"),
+        help='unique name for log files (default: run timestamp)')
     argparser.add_argument(
         '-a', '--autopilot',
         action='store_true',
