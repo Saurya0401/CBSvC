@@ -9,10 +9,15 @@ from multiprocessing import Pipe, Process
 from pylsl import StreamInlet, resolve_streams
 
 # Open Sound Control (OSC)
-from osc4py3.as_eventloop import *
+from osc4py3.as_eventloop import (
+    osc_startup,
+    osc_udp_client,
+    osc_udp_server,
+    osc_method,
+    osc_process,
+    osc_terminate
+)
 from osc4py3 import oscmethod as osm
-
-import numpy as np
 
 
 class ZephyrStream:
@@ -53,14 +58,13 @@ class ZephyrStream:
 
         return gen_inlet, rr_inlet
 
-
     def get_biometrics(self, gen_inlet, rr_inlet):
         gen_sample, _ = gen_inlet.pull_sample()
         rr_sample, _ = rr_inlet.pull_sample()
         hr = gen_sample[2]
         br = gen_sample[3]
         rr = rr_sample[0]
-        return np.array([hr, br, rr])
+        return [hr, br, rr]
 
     def handler_func(self, *args):
         for arg in args:
@@ -76,7 +80,7 @@ def monitor_and_send_biometrics(child_conn):
         live = zephyr_stream.get_biometrics(zephyr_stream.gen_inlet, zephyr_stream.rr_inlet)
         osc_process()
 
-        live_stress = np.append(live, zephyr_stream.gsr_val)
+        live_stress = [*live[:2], zephyr_stream.gsr_val]
         hr = str(live_stress[0])
         br = str(live_stress[1])
         gsr = str(live_stress[2])
@@ -90,11 +94,17 @@ def monitor_and_send_biometrics(child_conn):
 
 
 if __name__ == '__main__':
-    logging.basicConfig(format='%(levelname)s: %(message)s', level=logging.INFO)
+    logging.basicConfig(format='%(levelname)s: %(message)s', level=logging.DEBUG)
     parent_conn, child_conn = Pipe()
     p = Process(target=monitor_and_send_biometrics, args=(child_conn,))
     try:
         p.start()
-        print(parent_conn.recv())   # prints "Hello"
-    finally: 
-        pass 
+        logging.info(str(parent_conn.recv()))
+    except (AttributeError, TypeError, ValueError) as e:
+        logging.error('Error initializing Zephyr stream: %s', e.args[0])
+    except KeyboardInterrupt:
+        logging.info('Cancelled by user. Bye!')
+    finally:
+        p.terminate()
+        p.join()
+        logging.info('Zephyr stream terminated.')

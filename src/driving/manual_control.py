@@ -36,14 +36,13 @@ try:
     import numpy as np
     from multiprocessing import Pipe, Process
     sys.path.append('App_Zephyr_main')
-    from src.driving.zephyr_stream import ZephyrStream
 except ImportError as exc:
     raise RuntimeError('Cannot import required libraries') from exc
 
 import carla
 from carla import ColorConverter as cc
 
-from src.driving.zephyr_stream import ZephyrStream
+from src.driving.zephyr_stream import monitor_and_send_biometrics
 from src.scenarios.weather import WeatherManager, WEATHER_PRESETS
 
 
@@ -342,6 +341,7 @@ class HUD:
             gsr = float(self.gsr)
             self.valid_data = True
         except (TypeError, ValueError):
+            logging.error('Invalid data received from Zephyr: %s', str(biometrics))
             self.valid_data = False
 
         if self.valid_data:
@@ -663,7 +663,7 @@ class CameraManager(object):
             image.save_to_disk('_out/%08d' % image.frame)
 
 
-def game_loop(args):
+def game_loop(args, parent_conn, child_conn):
     pygame.init()
     pygame.font.init()
     world = None
@@ -688,7 +688,7 @@ def game_loop(args):
             world.tick(clock)
             world.render(display)
             pygame.display.flip()
-    
+
     finally:
         parent_conn.send(True)
         child_conn.close()
@@ -700,8 +700,28 @@ def game_loop(args):
 
 
 def main():
-    argparser = argparse.ArgumentParser(
-        description='CARLA Manual Control Client')
+    parent_conn, child_conn = Pipe()
+    p = Process(target=monitor_and_send_biometrics, args=(child_conn,))
+    try:
+        p.start()
+        logging.info(str(parent_conn.recv()))
+    except (AttributeError, TypeError, ValueError) as e:
+        logging.error('Error initializing Zephyr stream: %s', e.args[0])
+    except KeyboardInterrupt:
+        logging.info('Cancelled by user. Bye!')
+    else:
+        try:
+            game_loop(args, parent_conn, child_conn)
+        except KeyboardInterrupt:
+            logging.info('Cancelled by user. Bye!')
+    finally:
+        p.terminate()
+        p.join()
+        logging.info('Zephyr stream terminated.')
+
+
+if __name__ == '__main__':
+    argparser = argparse.ArgumentParser(description='CARLA Manual Control Client')
     argparser.add_argument(
         '-v', '--verbose',
         action='store_true',
@@ -711,13 +731,13 @@ def main():
         '--host',
         metavar='H',
         default='127.0.0.1',
-        help='IP of the host server (default: 127.0.0.1)')
+        help='IP of the host server (default: %(default)s)')
     argparser.add_argument(
         '-p', '--port',
         metavar='P',
         default=2000,
         type=int,
-        help='TCP port to listen to (default: 2000)')
+        help='TCP port to listen to (default: %(default)s)')
     argparser.add_argument(
         '-a', '--autopilot',
         action='store_true',
@@ -727,35 +747,21 @@ def main():
         metavar='WIDTHxHEIGHT',
         default='1280x720',
         #default='4160x768',
-        help='window resolution (default: 1280x720)')
+        help='window resolution (default: %(default)s)')
     argparser.add_argument(
         '--filter',
         metavar='PATTERN',
         default='vehicle.*',
-        help='actor filter (default: "vehicle.*")')
+        help='actor filter (default: "%(default)s")')
     args = argparser.parse_args()
-
     args.width, args.height = [int(x) for x in args.res.split('x')]
 
-    log_level = logging.DEBUG if args.debug else logging.INFO
-    logging.basicConfig(format='%(levelname)s: %(message)s', level=log_level)
-
+    logging.basicConfig(
+        format='%(levelname)s: %(message)s', 
+        level=logging.DEBUG if args.debug else logging.INFO
+    )
     logging.info('listening to server %s:%s', args.host, args.port)
 
     print(__doc__)
 
-    try:
-        game_loop(args)
-    except KeyboardInterrupt:
-        print('\nCancelled by user. Bye!')
-
-
-if __name__ == '__main__':
-    parent_conn, child_conn = Pipe()
-    zephyr_stream = ZephyrStream(child_conn)
-    p = Process(target=zephyr_stream.monitor_and_send_biometrics)
-    try:
-        p.start()
-        print(parent_conn.recv())   # prints "Hello"
-    finally: 
-        main()   
+    main()
