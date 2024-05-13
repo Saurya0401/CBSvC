@@ -13,11 +13,9 @@ from osc4py3.as_eventloop import (
     osc_startup,
     osc_udp_client,
     osc_udp_server,
-    osc_method,
     osc_process,
     osc_terminate
 )
-from osc4py3 import oscmethod as osm
 
 
 gsr_val = 0
@@ -50,7 +48,6 @@ class ZephyrStream:
 
         logging.info('Initializing ZephyrGeneral...')
         self.child_conn.send('Zephyr stream is working!')
-        logging.info('PAST STREAMS')
 
         return gen_inlet
 
@@ -67,7 +64,7 @@ class ZephyrStream:
         # print('activity:', str(gen_sample[6]))
         # print('peak acc.:', str(gen_sample[7]))
         # print('batt. voltage:', str(gen_sample[8]))
-        print('batt. percent:', str(gen_sample[9]))
+        logging.info('batt. percent: %s', str(gen_sample[9]))
         # print('breathing wave amp.:', str(gen_sample[10]))
         # print('breathing wave noise.:', str(gen_sample[11]))
         # print('breathing wave conf.:', str(gen_sample[12]))
@@ -83,7 +80,10 @@ class ZephyrStream:
 
 
 def monitor_and_send_biometrics(child_conn, debug=False):
-
+    logging.basicConfig(
+        format='ZEPHYR-%(levelname)s: %(message)s',
+        level=logging.DEBUG if debug else logging.INFO
+    )
     zephyr_stream = ZephyrStream(child_conn)
     while True:
         if zephyr_stream.child_conn.poll():
@@ -100,20 +100,19 @@ def monitor_and_send_biometrics(child_conn, debug=False):
 
         # send data to CARLA
         data = [hr, br, gsr]
-        if debug:
-            print(f'HR: {hr}, BR: {br}, GSR: {gsr}')
+        logging.debug('HR: %s, BR: %s, GSR: %s', str(hr), str(br), str(gsr))
         zephyr_stream.child_conn.send(data)
 
     osc_terminate()
 
 
 if __name__ == '__main__':
-    logging.basicConfig(format='%(levelname)s: %(message)s', level=logging.DEBUG)
+    logging.basicConfig(format='ZEPHYR-%(levelname)s: %(message)s', level=logging.DEBUG)
     parent_conn, child_conn = Pipe()
     p = Process(target=monitor_and_send_biometrics, args=(child_conn, True))
     try:
         p.start()
-        print(str(parent_conn.recv()))
+        logging.info(str(parent_conn.recv()))
     except (AttributeError, TypeError, ValueError) as e:
         logging.error('Error initializing Zephyr stream: %s', e.args[0])
     except KeyboardInterrupt:
