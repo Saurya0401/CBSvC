@@ -107,7 +107,7 @@ def main():
 
 
 if __name__ == '__main__':
-    logging.basicConfig(format='%(levelname)s: %(message)s', level=logging.INFO)
+    logging.basicConfig(format='SCENARIO-%(levelname)s: %(message)s', level=logging.INFO)
     argparser = argparse.ArgumentParser(description=__doc__)
     argparser.add_argument(
         '--host',
