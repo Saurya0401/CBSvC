@@ -677,7 +677,7 @@ def game_loop(args, parent_conn, child_conn):
             pygame.HWSURFACE | pygame.DOUBLEBUF)
 
         hud = HUD(args.width, args.height, args.name, parent_conn)
-        world = World(client.get_world(), hud, args.filter)
+        world = World(client.get_world(), hud, args.vehicle)
         controller = SteeringControl(world, args.autopilot)
 
         clock = pygame.time.Clock()
@@ -752,15 +752,15 @@ if __name__ == '__main__':
         #default='4160x768',
         help='window resolution (default: %(default)s)')
     argparser.add_argument(
-        '--filter',
+        '--vehicle',
         metavar='PATTERN',
-        default='vehicle.*',
-        help='actor filter (default: "%(default)s")')
+        default='vehicle.dodge.charger_2020',
+        help='actor vehicle (default: "%(default)s")')
     args = argparser.parse_args()
     args.width, args.height = [int(x) for x in args.res.split('x')]
 
     logging.basicConfig(
-        format='%(levelname)s: %(message)s', 
+        format='CONTROL-%(levelname)s: %(message)s',
         level=logging.DEBUG if args.debug else logging.INFO
     )
     logging.info('listening to server %s:%s', args.host, args.port)
