@@ -35,38 +35,29 @@ class ZephyrStream:
         osc_udp_client(self.ip, self.port, 'udplisten')
         osc_udp_server(self.ip, self.port, 'udpclient')
 
-        # Associate Python functions with message address patterns, using defaults argument
-        osc_method('/edaMikroS', handler_func, argscheme=osm.OSCARG_DATAUNPACK)
-
         # Resolve streams
-        self.gen_inlet, self.rr_inlet = self.resolve_streams()
+        self.gen_inlet = self.resolve_streams()
 
 
     def resolve_streams(self):
         logging.info("Looking for an EEG stream...")
         streams = resolve_streams()
         gen_stream = None
-        rr_stream = None
         for stream in streams:
             if stream.name() == 'ZephyrSummary':
                 gen_stream = stream
-            elif stream.name() == 'ZephyrRtoR':
-                rr_stream = stream
         gen_inlet = StreamInlet(gen_stream)
-        rr_inlet = StreamInlet(rr_stream)
 
         logging.info('Initializing ZephyrGeneral...')
         self.child_conn.send('Zephyr stream is working!')
         logging.info('PAST STREAMS')
 
-        return gen_inlet, rr_inlet
+        return gen_inlet
 
-    def get_biometrics(self, gen_inlet, rr_inlet):
+    def get_biometrics(self, gen_inlet):
         gen_sample, _ = gen_inlet.pull_sample()
-        rr_sample, _ = rr_inlet.pull_sample()
         hr = gen_sample[2]
         br = gen_sample[3]
-        rr = rr_sample[0]
         # print(f'gen_sample = {gen_sample}')
         # print()
         # print('heart rate:', str(gen_sample[2]))
@@ -88,14 +79,7 @@ class ZephyrStream:
         # print('GSR:', str(gen_sample[18]))
         # print('Other vals:', [str(v) for v in gen_sample[18:]])
         # print()
-        # print(f'rr_sample = {rr_sample}')
-        return [hr, br, rr]
-
-def handler_func(*args):
-    for arg in args:
-        global gsr_val
-        print(arg)
-        gsr_val = arg
+        return [hr, br]
 
 
 def monitor_and_send_biometrics(child_conn, debug=False):
@@ -106,10 +90,10 @@ def monitor_and_send_biometrics(child_conn, debug=False):
             zephyr_stream.child_conn.close()
             break
 
-        live = zephyr_stream.get_biometrics(zephyr_stream.gen_inlet, zephyr_stream.rr_inlet)
+        live = zephyr_stream.get_biometrics(zephyr_stream.gen_inlet)
         osc_process()
 
-        live_stress = [*live[:2], gsr_val]
+        live_stress = [*live, gsr_val]
         hr = str(live_stress[0])
         br = str(live_stress[1])
         gsr = str(live_stress[2])
