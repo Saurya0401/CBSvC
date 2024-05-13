@@ -48,7 +48,7 @@ class ZephyrStream:
         gen_stream = None
         rr_stream = None
         for stream in streams:
-            if stream.name() == 'ZephyrGeneral':
+            if stream.name() == 'ZephyrSummary':
                 gen_stream = stream
             elif stream.name() == 'ZephyrRtoR':
                 rr_stream = stream
@@ -67,14 +67,39 @@ class ZephyrStream:
         hr = gen_sample[2]
         br = gen_sample[3]
         rr = rr_sample[0]
+        # print(f'gen_sample = {gen_sample}')
+        # print()
+        # print('heart rate:', str(gen_sample[2]))
+        # print('resp. rate:', str(gen_sample[3]))
+        # print('skin temp:', str(gen_sample[4]))
+        # print('posture:', str(gen_sample[5]))
+        # print('activity:', str(gen_sample[6]))
+        # print('peak acc.:', str(gen_sample[7]))
+        # print('batt. voltage:', str(gen_sample[8]))
+        print('batt. percent:', str(gen_sample[9]))
+        # print('breathing wave amp.:', str(gen_sample[10]))
+        # print('breathing wave noise.:', str(gen_sample[11]))
+        # print('breathing wave conf.:', str(gen_sample[12]))
+        # print('ecg amp.:', str(gen_sample[13]))
+        # print('ecg noise:', str(gen_sample[14]))
+        # print('heart rate conf:', str(gen_sample[15]))
+        # print('heart rate var.:', str(gen_sample[16]))
+        # print('system conf:', str(gen_sample[17]))
+        # print('GSR:', str(gen_sample[18]))
+        # print('Other vals:', [str(v) for v in gen_sample[18:]])
+        # print()
+        # print(f'rr_sample = {rr_sample}')
         return [hr, br, rr]
 
 def handler_func(*args):
     for arg in args:
         global gsr_val
+        print(arg)
         gsr_val = arg
 
+
 def monitor_and_send_biometrics(child_conn, debug=False):
+
     zephyr_stream = ZephyrStream(child_conn)
     while True:
         if zephyr_stream.child_conn.poll():
@@ -84,7 +109,7 @@ def monitor_and_send_biometrics(child_conn, debug=False):
         live = zephyr_stream.get_biometrics(zephyr_stream.gen_inlet, zephyr_stream.rr_inlet)
         osc_process()
 
-        live_stress = [*live[2], gsr_val]
+        live_stress = [*live[:2], gsr_val]
         hr = str(live_stress[0])
         br = str(live_stress[1])
         gsr = str(live_stress[2])

@@ -23,8 +23,8 @@ except IndexError:
 import carla
 from numpy import random
 
-from scenarios.traffic import TrafficGenerator
-from scenarios.weather import WeatherType, WeatherManager, TimeOfDay
+from src.scenarios.traffic import TrafficGenerator
+from src.scenarios.weather import WeatherType, WeatherManager, TimeOfDay
 
 
 def set_global_settings(world, traffic_manager):
