@@ -11,6 +11,7 @@ import glob
 import os
 import sys
 import time
+from enum import Enum, auto
 
 try:
     sys.path.append(glob.glob('../carla/dist/carla-*%d.%d-%s.egg' % (
@@ -27,6 +28,14 @@ from src.scenarios.traffic import TrafficGenerator
 from src.scenarios.weather import WeatherType, WeatherManager, TimeOfDay
 
 
+class Scenario(Enum):
+    default = auto()
+    night = auto()
+    overspeeding = auto()
+    distracted = auto()
+    congestion = auto()
+
+
 def set_global_settings(world, traffic_manager):
     settings = world.get_settings()
     traffic_manager.set_synchronous_mode(True)
@@ -38,6 +47,7 @@ def set_global_settings(world, traffic_manager):
 
 def main():
 
+    scenario = Scenario[args.scenario]
     client = carla.Client(args.host, args.port)
     client.set_timeout(10.0)
     random.seed(args.seed if args.seed is not None else int(time.time()))
@@ -55,10 +65,29 @@ def main():
         # initialize vehicles and pedestrians
         traffic_gen = TrafficGenerator(client, world, traffic_manager, args)
         traffic_gen.set_global_tm_settings()
-        if not args.congestion:
+        if scenario != Scenario.congestion and not args.congestion:
             traffic_gen.spawn_vehicles()
             if args.aggression:
-                traffic_gen.set_aggressive_behavior_all()
+                traffic_gen.set_aggressive_behavior_all(
+                    en_ignore_light=True,
+                    en_ignore_signs=True,
+                    en_overspeed=True,
+                    en_lane_change=True
+                )
+            elif scenario == Scenario.overspeeding:
+                traffic_gen.set_aggressive_behavior_all(
+                    en_ignore_light=False,
+                    en_ignore_signs=False,
+                    en_overspeed=True,
+                    en_lane_change=True
+                )
+            elif scenario == Scenario.distracted:
+                traffic_gen.set_aggressive_behavior_all(
+                    en_ignore_light=True,
+                    en_ignore_signs=True,
+                    en_overspeed=False,
+                    en_lane_change=False
+                )
             if not args.disable_car_lights:
                 traffic_gen.set_automatic_vehicle_lights()
         traffic_gen.spawn_walkers()
@@ -70,8 +99,12 @@ def main():
 
         # initialize weather
         weather_man = WeatherManager(world, world.get_actors(traffic_gen.vehicles_list))
-        weather_man.set_weather(WeatherType[args.weather.upper()])
-        weather_man.set_time_of_day(TimeOfDay[args.time.upper()])
+        if scenario == Scenario.night:
+            weather_man.set_weather(WeatherType.CLEAR)
+            weather_man.set_time_of_day(TimeOfDay.NIGHT)
+        else:
+            weather_man.set_weather(WeatherType[args.weather.upper()])
+            weather_man.set_time_of_day(TimeOfDay[args.time.upper()])
         weather_man.apply_settings()
 
         vehicles_list = traffic_gen.vehicles_list
@@ -81,7 +114,7 @@ def main():
 
         while True:
             world.tick()
-            if args.congestion:
+            if scenario == Scenario.congestion or args.congestion:
                 vehicle = traffic_gen.spawn_congestion_vehicle()
                 if vehicle:
                     weather_man.set_car_lights(vehicle)
@@ -109,6 +142,12 @@ def main():
 if __name__ == '__main__':
     logging.basicConfig(format='SCENARIO-%(levelname)s: %(message)s', level=logging.INFO)
     argparser = argparse.ArgumentParser(description=__doc__)
+    argparser.add_argument(
+        'scenario',
+        type=str,
+        choices=[s.name for s in Scenario],
+        help='Scenario name'
+    )
     argparser.add_argument(
         '--host',
         metavar='H',

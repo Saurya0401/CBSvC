@@ -158,32 +158,32 @@ class TrafficGenerator:
 
         logging.info('Spawned %d vehicles', len(self.vehicles_list))
 
-    def set_aggressive_behavior(self, vehicle_actor):
-        lead_dist = 0.5 + random.random_sample() # random value between 0.5 and 1.5
-        self.traffic_manager.distance_to_leading_vehicle(vehicle_actor, lead_dist)
-        logging.info('Vehicle "%s" distance to lead vehicle set to %.2f m',
-                     self.get_vehicle_desc(vehicle_actor), lead_dist)
+    def set_aggressive_behavior(self, vehicle_actor, en_lane_change, en_ignore_light, en_ignore_signs, en_overspeed):
+        # lead_dist = 0.5 + random.random_sample() # random value between 0.5 and 1.5
+        # self.traffic_manager.distance_to_leading_vehicle(vehicle_actor, lead_dist)
+        # logging.info('Vehicle "%s" distance to lead vehicle set to %.2f m',
+        #              self.get_vehicle_desc(vehicle_actor), lead_dist)
         lane_change, ignore_light, ignore_signs, overspeed = [self.coin_toss() for _ in range(4)]
-        if lane_change:
+        if en_lane_change and lane_change:
             self.traffic_manager.force_lane_change(vehicle_actor, self.coin_toss())
             logging.info('Vehicle "%s" has force lane change behavior', self.get_vehicle_desc(vehicle_actor))
-        if ignore_light:
+        if en_ignore_light and ignore_light:
             self.traffic_manager.ignore_lights_percentage(vehicle_actor, TrafficGenerator.IGNORE_LIGHTS_PERCENT)
             logging.info('Vehicle "%s" has a %.1f percent chance of ignoring traffic lights',
                          self.get_vehicle_desc(vehicle_actor), TrafficGenerator.IGNORE_LIGHTS_PERCENT)
-        if ignore_signs:
+        if en_ignore_signs and ignore_signs:
             self.traffic_manager.ignore_signs_percentage(vehicle_actor, TrafficGenerator.IGNORE_SIGNS_PERCENT)
             logging.info('Vehicle "%s" has a %.1f percent chance of ignoring traffic signs',
                          self.get_vehicle_desc(vehicle_actor), TrafficGenerator.IGNORE_SIGNS_PERCENT)
-        if overspeed:
+        if en_overspeed and overspeed:
             self.traffic_manager.vehicle_percentage_speed_difference(vehicle_actor, TrafficGenerator.SPEED_DIFF_PERCENT)
             logging.info('Vehicle "%s" will drive %.1f percent faster than the speed limit',
                          self.get_vehicle_desc(vehicle_actor), -1*TrafficGenerator.SPEED_DIFF_PERCENT)
 
-    def set_aggressive_behavior_all(self):
+    def set_aggressive_behavior_all(self, en_lane_change, en_ignore_light, en_ignore_signs, en_overspeed):
         all_vehicle_actors = self.world.get_actors(self.vehicles_list)
         for vehicle_actor in all_vehicle_actors:
-            self.set_aggressive_behavior(vehicle_actor)
+            self.set_aggressive_behavior(vehicle_actor, en_lane_change, en_ignore_light, en_ignore_signs, en_overspeed)
 
     def set_automatic_vehicle_lights(self):
         """Set automatic vehicle lights update if specified"""
