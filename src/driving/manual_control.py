@@ -263,7 +263,7 @@ class HUD:
         self.speed_log = f'src/logs/data_log_{name}.csv'
         self.collisions_log = f'src/logs/collisions_{name}.txt'
         with open(self.speed_log, 'w', encoding='utf-8') as f:
-            f.write('time_seconds,time,speed,throttle,brake,steer,heart_rate,breathing_rate,GSR\n')
+            f.write('time_seconds,time,speed,throttle,brake,steer,heart_rate,breathing_rate\n')
         with open(self.collisions_log, 'w', encoding='utf-8') as f:
             f.write('time_seconds,time,collision\n')
 
@@ -375,7 +375,7 @@ class HUD:
                 self._info_text.append('% 4dm %s' % (d, vehicle_type))
                       
         with open(self.speed_log, 'a', encoding='utf-8') as speed_f:
-            speed_f.write(f'{timestamp.seconds},{timestamp},{speed:.2f},{c.throttle:.2f},{c.brake:.2f},{c.steer:.2f},{self.heart_rate},{self.breathing_rate},{self.gsr}\n')
+            speed_f.write(f'{timestamp.seconds},{timestamp},{speed:.2f},{c.throttle:.2f},{c.brake:.2f},{c.steer:.2f},{self.heart_rate},{self.breathing_rate}\n')
 
         with open(self.collisions_log, 'a', encoding='utf-8') as coll_f:
             coll_f.write(f'{timestamp.seconds},{timestamp},{collision}\n')
