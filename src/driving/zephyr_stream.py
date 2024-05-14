@@ -93,14 +93,12 @@ def monitor_and_send_biometrics(child_conn, debug=False):
         live = zephyr_stream.get_biometrics(zephyr_stream.gen_inlet)
         osc_process()
 
-        live_stress = [*live, gsr_val]
-        hr = str(live_stress[0])
-        br = str(live_stress[1])
-        gsr = str(live_stress[2])
+        hr = str(live[0])
+        br = str(live[1])
 
         # send data to CARLA
-        data = [hr, br, gsr]
-        logging.debug('HR: %s, BR: %s, GSR: %s', str(hr), str(br), str(gsr))
+        data = [hr, br]
+        logging.debug('HR: %s, BR: %s', hr, br)
         zephyr_stream.child_conn.send(data)
 
     osc_terminate()

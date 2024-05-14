@@ -255,10 +255,8 @@ class HUD:
         # biometrics data
         self.heart_rate = 0.0
         self.breathing_rate = 0.0
-        self.gsr = 0.0
         self.hr_log = collections.deque([0], 200)
         self.br_log = collections.deque([0], 200)
-        self.gsr_log = collections.deque([0], 200)
         self.valid_data = False
 
         # log files
@@ -332,13 +330,11 @@ class HUD:
             biometrics = self.zephyr_conn.recv()
             self.heart_rate = biometrics[0]
             self.breathing_rate = biometrics[1]
-            self.gsr = biometrics[2]
 
         # check if biometrics data is valid
         try:
             heart_rate = float(self.heart_rate)
             breathing_rate = float(self.breathing_rate)
-            gsr = float(self.gsr)
             self.valid_data = True
         except (TypeError, ValueError):
             logging.error('Invalid data received from Zephyr: %s', str(biometrics))
@@ -353,27 +349,19 @@ class HUD:
             br_plot = list(self.br_log)
             br_plot = [x / 35 for x in br_plot]
 
-            self.gsr_log.append(gsr)
-            gsr_plot = list(self.gsr_log)
-            gsr_plot = [x / 15 for x in gsr_plot]
-
             self._info_text += [
                 '',
-                "Heart Rate: % 16.1f" % heart_rate,
+                'Heart Rate: % 16.1f' % heart_rate,
                 hr_plot,
                 '',
-                "Breathing Rate: % 12.1f" % breathing_rate,
+                'Breathing Rate: % 12.1f' % breathing_rate,
                 br_plot,
-                '',
-                "GSR: % 23.1f" % gsr,
-                gsr_plot
             ]
         else:
             self._info_text += [
                 '',
-                "Heart Rate: % 16s" % self.heart_rate,
-                "Breathing Rate: % 12s" % self.breathing_rate,
-                "GSR: % 23s" % self.gsr
+                'Heart Rate: % 16s' % self.heart_rate,
+                'Breathing Rate: % 12s' % self.breathing_rate,
             ]
 
         if len(vehicles) > 1:
