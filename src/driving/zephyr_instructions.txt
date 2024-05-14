@@ -1,6 +1,18 @@
 1. Activate carlaenv environment
 2. Navigate to C:\Users\aicps\WindowsNoEditor\PythonAPI\examples\App_Zephyr_main
 3. Execute run.cmd
+
 4. Activate carlaenv in a new environment
 5. Navigate to C:\Users\aicps\CBSvC
 5. Execute python -m src.driving.zephyr_stream
+
+6. Activate carlaenv in a new environment
+7. Navigate to C:\Users\aicps\CBSvC
+8. Execute python -m src.scenarios.scenario
+
+9. Activate carlaenv in a new environment
+10. Navigate to C:\Users\aicps\CBSvC
+11. Execute python -m src.driving.manual_control --name "name-type driving scenario"
+
+Drive each scenario for 10 minutes. 
+
