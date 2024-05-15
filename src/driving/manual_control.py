@@ -260,8 +260,8 @@ class HUD:
         self.valid_data = False
 
         # log files
-        self.speed_log = f'src/logs/data_log_{name}.csv'
-        self.collisions_log = f'src/logs/collisions_{name}.txt'
+        self.speed_log = f'src/logs/data_log_{name}_{datetime.datetime.now().strftime("%m-%d_%H%M")}.csv'
+        self.collisions_log = f'src/logs/collisions_{name}_{datetime.datetime.now().strftime("%m-%d_%H%M")}.txt'
         with open(self.speed_log, 'w', encoding='utf-8') as f:
             f.write('time_seconds,time,speed,throttle,brake,steer,heart_rate,breathing_rate\n')
         with open(self.collisions_log, 'w', encoding='utf-8') as f:
@@ -727,8 +727,9 @@ if __name__ == '__main__':
         help='TCP port to listen to (default: %(default)s)')
     argparser.add_argument(
         '--name',
-        default=datetime.datetime.now().strftime("%m-%d_%H%M"),
-        help='unique name for log files (default: run timestamp)')
+        type=str,
+        required=True,
+        help='unique name for log files')
     argparser.add_argument(
         '-a', '--autopilot',
         action='store_true',
