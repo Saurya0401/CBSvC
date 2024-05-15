@@ -1,7 +1,7 @@
 import pandas as pd
 import os
 
-data_dir = ''
+data_dir = 'src/logs/'
 
 for folder in os.listdir(data_dir):
     path = data_dir+folder
