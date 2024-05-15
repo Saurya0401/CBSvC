@@ -2,7 +2,6 @@
 
 ### Start Zephyr background process
 1. Open an Anaconda prompt
-2. Execute `conda activate carlaenv`
 3. Execute `cd C:\Users\aicps\WindowsNoEditor\PythonAPI\examples\App_Zephyr_main`
 4. Execute `run.cmd`
 
