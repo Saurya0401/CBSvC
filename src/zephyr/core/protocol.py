@@ -459,7 +459,7 @@ class SummaryDataMessageV2(SummaryDataMessage):
         self.br_amplitude_low = (ext_status_info & 2 ** 2) > 0 + flags_valid
         self.br_amplitude_high = (ext_status_info & 2 ** 3) > 0 + flags_valid
         self.br_amplitude_variance_high = (ext_status_info & 2 ** 4) > 0 + flags_valid
-        self.br_signal_eval_state = (ext_status_info >> 5) & 3 + flags_valid
+        # self.br_signal_eval_state = (ext_status_info >> 5) & 3 + flags_valid
 
 
 class SummaryDataMessageV3(SummaryDataMessage):
