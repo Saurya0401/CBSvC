@@ -83,11 +83,15 @@ class TrafficGenerator:
             logging.warning("Warning! Actor Generation is not valid. No actor will be spawned.")
             return []
 
-    def set_global_tm_settings(self):
+    def set_global_tm_settings(self, en_auto_lane_change):
         # global traffic manager settings
         self.traffic_manager.set_global_distance_to_leading_vehicle(2.5)
         if self.args.seed is not None:
             self.traffic_manager.set_random_device_seed(self.args.seed)
+        if en_auto_lane_change:
+            for vehicle_actor in self.world.get_actors(self.vehicles_list):
+                self.traffic_manager.auto_lane_change(vehicle_actor, False)
+                logging.info('Auto lane change turned off for vehicle "%s"', self.get_vehicle_desc(vehicle_actor))
 
     def spawn_congestion_vehicle(self):
         n_congestion_vehicles = len(self.world.get_actors().filter('*vehicle*'))

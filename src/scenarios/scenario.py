@@ -64,7 +64,7 @@ def main():
 
         # initialize vehicles and pedestrians
         traffic_gen = TrafficGenerator(client, world, traffic_manager, args)
-        traffic_gen.set_global_tm_settings()
+        traffic_gen.set_global_tm_settings(en_auto_lane_change=scenario == Scenario.default)
         if scenario != Scenario.congestion and not args.congestion:
             traffic_gen.spawn_vehicles()
             if args.aggression:
