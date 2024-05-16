@@ -14,7 +14,7 @@ def remove_duplicates(log_file):
     f = Path(log_file)
     df = pd.read_csv(f)
     df_new = df.drop_duplicates(subset=['speed', 'throttle', 'brake', 'steer'], keep='first')
-    df_new.to_csv(f'{f.parent}/{f.name}_filtered.csv', index=False)
+    df_new.to_csv(f'{f.parent}/{f.stem}_filtered.csv', index=False)
 
 def remove_duplicates_multi(logs_dir):
     """Remove duplicates from all log files in a directory"""
@@ -25,7 +25,7 @@ def remove_duplicates_multi(logs_dir):
     for f in Path(logs_dir).glob('*.csv'):
         df = pd.read_csv(f)
         df_new = df.drop_duplicates(subset=['speed', 'throttle', 'brake', 'steer'], keep='first')
-        df_new.to_csv(f'{output_dir}/{f.name}_filtered.csv', index=False)
+        df_new.to_csv(f'{output_dir}/{f.stem}_filtered.csv', index=False)
 
 
 if __name__ == '__main__':
