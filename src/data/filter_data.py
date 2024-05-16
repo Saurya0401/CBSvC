@@ -13,7 +13,7 @@ def remove_duplicates(log_file):
 
     f = Path(log_file)
     df = pd.read_csv(f)
-    df_new = df.drop_duplicates(subset=['time_seconds', 'time', 'speed', 'throttle'], keep='first')
+    df_new = df.drop_duplicates(subset=['speed', 'throttle', 'brake', 'steer'], keep='first')
     df_new.to_csv(f'{f.parent}/{f.name}_filtered.csv', index=False)
 
 def remove_duplicates_multi(logs_dir):
@@ -24,13 +24,13 @@ def remove_duplicates_multi(logs_dir):
 
     for f in Path(logs_dir).glob('*.csv'):
         df = pd.read_csv(f)
-        df_new = df.drop_duplicates(subset=['time_seconds', 'time', 'speed', 'throttle'], keep='first')
+        df_new = df.drop_duplicates(subset=['speed', 'throttle', 'brake', 'steer'], keep='first')
         df_new.to_csv(f'{output_dir}/{f.name}_filtered.csv', index=False)
 
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(__doc__)
-    group = parser.add_mutually_exclusive_group(required=True)
+    group = parser.add_mutually_exclusive_group()
     group.add_argument(
         '-d', '--logs_dir',
         metavar='DIR',
@@ -49,3 +49,5 @@ if __name__ == '__main__':
         remove_duplicates_multi(args.logs_dir)
     elif args.log_file:
         remove_duplicates(args.log_file)
+    else:
+        remove_duplicates_multi('src/logs')
