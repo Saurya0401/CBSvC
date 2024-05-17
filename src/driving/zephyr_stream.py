@@ -18,16 +18,12 @@ from osc4py3.as_eventloop import (
 )
 
 
-gsr_val = 0
-
-
 class ZephyrStream:
 
     def __init__(self, child_conn, ip='127.0.0.1', port=8000):
         self.child_conn = child_conn
         self.ip = ip
         self.port = port
-        self.gsr_val = 0
 
         osc_startup()
         osc_udp_client(self.ip, self.port, 'udplisten')
