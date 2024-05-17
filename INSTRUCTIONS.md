@@ -37,7 +37,7 @@ Execute `python -m src.data.filter_data`
 
 ### Plot data
 Execute `python -m src.data.plot_data <log file>`
-- Use `-all` to plot all data in separate graphs
+- Use `--all` to plot all data in separate graphs
 - Use `-d <data 1> <data 2> ...` to plot multiple data in separate graphs.
 <br>E.g.: `-d speed throttle` will produce two graphs, time vs speed and time vs throttle.
 - Use `-c <data 1> <data 2> ...` to plot multiple data in the same graph.
