@@ -19,7 +19,7 @@ _NOTE: Don't add_ `--aggression` _or_ `--congestion` _in step 5 as these argumen
 2. Execute `conda activate carlaenv`
 3. Execute `cd C:\Users\aicps\CBSvC`
 4. Execute `python -m src.driving.manual_control --name <name>`
-_NOTE: Using the same name multiple times will override previous files. If_ `--name` _is not provided, the log file's name will be a timestamp of when manual control was started._
+_NOTE: Using the same name multiple times will override previous files_
 
 ### Run each scenario for 10 mins
 - Keep an eye out on the biometrics, sometimes it stops working.
