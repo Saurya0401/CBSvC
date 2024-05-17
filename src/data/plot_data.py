@@ -81,7 +81,7 @@ class DataPlotter:
             lines=lines
         )
 
-    def _plot_shared_axes(self, log_data, shift_y_mul=False, ax=None):
+    def _plot_shared_axes(self, log_data, shift_y_mul=0, ax=None):
         """Plot data on a shared axis"""
 
         if ax is None:
@@ -136,7 +136,7 @@ if __name__ == '__main__':
     group.add_argument(
         '--all',
         action='store_true',
-        help='Plot all data'
+        help='Plot all data in multiple figures'
     )
     args = parser.parse_args()
 
