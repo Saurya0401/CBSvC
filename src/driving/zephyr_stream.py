@@ -1,5 +1,5 @@
 """
-Provides zephyr biometrics data stream
+Provides a Zephyr biometrics data stream, transmitting data via OSC.
 """
 
 import logging
@@ -19,8 +19,25 @@ from osc4py3.as_eventloop import (
 
 
 class ZephyrStream:
+    """
+    Handles the Zephyr biometrics data stream and sends biometrics data via a pipe.
+
+    Attributes:
+        child_conn (Connection): Multiprocessing connection for communication.
+        ip (str): IP address for OSC client and server.
+        port (int): Port number for OSC client and server.
+        gen_inlet (StreamInlet): Inlet for the resolved Zephyr stream.
+    """
 
     def __init__(self, child_conn, ip='127.0.0.1', port=8000):
+        """
+        Initializes the ZephyrStream with OSC setup and resolves the biometrics stream.
+
+        Args:
+            child_conn (Connection): Multiprocessing connection for communication.
+            ip (str, optional): IP address for OSC client and server. Defaults to '127.0.0.1'.
+            port (int, optional): Port number for OSC client and server. Defaults to 8000.
+        """
         self.child_conn = child_conn
         self.ip = ip
         self.port = port
@@ -34,6 +51,12 @@ class ZephyrStream:
 
 
     def resolve_streams(self):
+        """
+        Resolves available LSL streams and initializes the Zephyr biometrics stream.
+
+        Returns:
+            StreamInlet: Inlet for the resolved Zephyr stream.
+        """
         logging.info("Looking for an EEG stream...")
         streams = resolve_streams()
         gen_stream = None
@@ -48,6 +71,15 @@ class ZephyrStream:
         return gen_inlet
 
     def get_biometrics(self, gen_inlet):
+        """
+        Extracts biometrics data from the Zephyr stream.
+
+        Args:
+            gen_inlet (StreamInlet): Inlet for the resolved Zephyr stream.
+
+        Returns:
+            list: Heart rate and breathing rate from the biometrics data.
+        """
         gen_sample, _ = gen_inlet.pull_sample()
         hr = gen_sample[2]
         br = gen_sample[3]
@@ -76,6 +108,13 @@ class ZephyrStream:
 
 
 def monitor_and_send_biometrics(child_conn, debug=False):
+    """
+    Monitors the Zephyr biometrics stream and sends data via OSC.
+
+    Args:
+        child_conn (Connection): Multiprocessing connection for communication.
+        debug (bool, optional): Flag to enable debug logging. Defaults to False.
+    """
     logging.basicConfig(
         format='ZEPHYR-%(levelname)s: %(message)s',
         level=logging.DEBUG if debug else logging.INFO
