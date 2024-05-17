@@ -12,14 +12,14 @@ _**This step must be completed before starting manual control**_
 3. Execute `cd C:\Users\aicps\CBSvC`
 4. (Optional) Execute `python -m src.scenarios.scenario --help` to get info on scenario options
 4. Execute `python -m src.scenarios.scenario <scenario_name>`
-_NOTE: Don't add_ `--aggression` _or_ `--congestion` _in step 5 as these arguments will override scenario specific settings_
+<br>_NOTE: Don't add_ `--aggression` _or_ `--congestion` _in step 5 as these arguments will override scenario specific settings_
 
 ### Start manual control
 1. Open an Anaconda prompt
 2. Execute `conda activate carlaenv`
 3. Execute `cd C:\Users\aicps\CBSvC`
 4. Execute `python -m src.driving.manual_control --name <name>`
-_NOTE: Using the same name multiple times will override previous files_
+<br>_NOTE: Using the same name multiple times will override previous files_
 
 ### Run each scenario for 10 mins
 - Keep an eye out on the biometrics, sometimes it stops working.
