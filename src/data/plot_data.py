@@ -1,5 +1,18 @@
 """
-Plot logged driving data
+Module for plotting logged driving data from a CSV file.
+
+This script allows the user to plot specific logged driving data, such as speed,
+throttle, brake, steer, heart rate, and breathing rate, against time. The data can 
+be plotted either in individual figures or combined into a single figure with 
+shared axes.
+
+Usage:
+    python plot_logged_data.py <log_file> [options]
+
+Options:
+    -d, --data    Plot specific data(s) in multiple figures
+    -c, --combi   Plot specific data(s) in a single figure
+    --all         Plot all data in multiple figures
 """
 
 from dataclasses import dataclass
@@ -10,8 +23,12 @@ import matplotlib.pyplot as plt
 
 @dataclass(frozen=True)
 class LogData:
-    """Utility class for formatting text in plots"""
+    """Utility class for formatting text in plots.
 
+    Attributes:
+        df_label (str): Label of the data in the DataFrame.
+        unit (str, optional): Unit of the data. Defaults to an empty string.
+    """
     df_label: str
     unit: str = ''
 
@@ -20,21 +37,36 @@ class LogData:
 
     @property
     def legend_text(self):
+        """Returns the legend text for the plot, with underscores replaced by spaces."""
         return self.df_label.replace('_', ' ')
 
     @property
     def y_label(self):
+        """Returns the y-axis label for the plot, including the unit if provided."""
         return self.legend_text + f' {f"({self.unit})" if self.unit else ""}'
 
     @property
     def title_text(self):
+        """Returns the title text for the plot, formatted in title case."""
         return self.df_label.replace("_", " ").title()
 
 
 class DataPlotter:
-    """Plot logged driving data"""
+    """Class for plotting logged driving data.
+
+    Attributes:
+        df (pandas.DataFrame): DataFrame containing the logged data.
+        figsize (tuple): Size of the figure for the plots.
+        colors (dict): Dictionary mapping data labels to colors.
+    """
 
     def __init__(self, df, figsize=(12, 6)):
+        """Initializes the DataPlotter with the given DataFrame and figure size.
+
+        Args:
+            df (pandas.DataFrame): DataFrame containing the logged data.
+            figsize (tuple, optional): Size of the figure for the plots. Defaults to (12, 6).
+        """
         self.df = df
         self.figsize = figsize
         self.colors = {
@@ -48,14 +80,23 @@ class DataPlotter:
 
     @staticmethod
     def _set_plot(title, lines=None):
+        """Sets the title and legend for the plot.
+
+        Args:
+            title (str): Title of the plot.
+            lines (list, optional): List of Line2D objects for the legend. Defaults to None.
+        """
         plt.title(title)
         if lines:
             plt.legend(handles=lines)
         plt.tight_layout()
 
     def plot(self, log_data):
-        """Plot specific data against time (s)"""
+        """Plots specific data against time (in seconds).
 
+        Args:
+            log_data (LogData): LogData object containing the data label and unit.
+        """
         data_label = str(log_data)
         plt.figure(figsize=self.figsize)
         plt.plot(
@@ -70,8 +111,11 @@ class DataPlotter:
         self._set_plot(f'Time vs {log_data.title_text}')
 
     def plot_combination(self, log_data_list):
-        """Plot multiple data against time (s) on a shared axis"""
+        """Plots multiple data against time (in seconds) on a shared axis.
 
+        Args:
+            log_data_list (list of LogData): List of LogData objects to plot.
+        """
         ax1, line1 = self._plot_shared_axes(log_data_list[0])
         lines = [line1]
         for i, ld in enumerate(log_data_list[1:]):
@@ -82,8 +126,16 @@ class DataPlotter:
         )
 
     def _plot_shared_axes(self, log_data, shift_y_mul=0, ax=None):
-        """Plot data on a shared axis"""
+        """Plots data on a shared axis.
 
+        Args:
+            log_data (LogData): LogData object containing the data label and unit.
+            shift_y_mul (int, optional): Multiplier for shifting the y-axis position. Defaults to 0.
+            ax (matplotlib.axes.Axes, optional): Existing axis to plot on. Defaults to None.
+
+        Returns:
+            tuple: Tuple containing the axis and the Line2D object.
+        """
         if ax is None:
             _, ax = plt.subplots(figsize=self.figsize)
             ax.set_xlabel('time (s)')
