@@ -1,7 +1,9 @@
 #!/usr/bin/env python
 
 """
-Weather management classes
+This module defines a WeatherManager class for managing weather settings and vehicle light states
+in a CARLA simulation environment. It also provides command-line functionality to set the weather
+and time of day in the simulation.
 """
 
 import argparse
@@ -12,6 +14,7 @@ import logging
 from enum import Enum, auto
 
 try:
+    # Dynamically append the path of the CARLA egg file to the system path
     sys.path.append(glob.glob('../carla/dist/carla-*%d.%d-%s.egg' % (
         sys.version_info.major,
         sys.version_info.minor,
@@ -23,11 +26,13 @@ import carla
 
 
 class TimeOfDay(Enum):
+    """Enumeration for different times of the day."""
     NOON = auto()
     NIGHT = auto()
 
 
 class WeatherType(Enum):
+    """Enumeration for different types of weather conditions."""
     CLEAR = auto()
     FOGGY = auto()
     RAINY = auto()
@@ -35,11 +40,29 @@ class WeatherType(Enum):
 
 
 class WeatherManager:
+    """
+    Manages weather settings and vehicle lights in a CARLA simulation environment.
+    
+    Attributes:
+        world (carla.World): The world instance where weather settings are applied.
+        vehicles (list[carla.Vehicle]): Vehicles to manage lights for, defaults to empty list.
+        clear_weather, cloudy_weather, rainy_weather, foggy_weather (carla.WeatherParameters):
+            Presets for different weather conditions.
+        current_weather (carla.WeatherParameters): Currently applied weather parameters.
+        weather_type (WeatherType): Current type of weather being simulated.
+        time_of_day (TimeOfDay): Current time of day in the simulation.
+    """
 
     def __init__(self, world, vehicles=None):
+        """
+        Initializes the WeatherManager with a world instance and optional vehicle list.
+        
+        Parameters:
+            world (carla.World): The world instance for weather management.
+            vehicles (list[carla.Vehicle], optional): Vehicles to manage lights, defaults to None.
+        """
         self.world = world
         self.vehicles = vehicles or []
-        self.weather = self.world.get_weather()
         self.clear_weather = carla.WeatherParameters.ClearNoon
         self.cloudy_weather = carla.WeatherParameters.CloudyNoon
         self.rainy_weather = carla.WeatherParameters.HardRainNoon
@@ -55,8 +78,14 @@ class WeatherManager:
         self.time_of_day = None
 
     def set_car_lights(self, vehicle):
+        """
+        Sets the lights of a vehicle based on the current weather conditions.
+        
+        Parameters:
+            vehicle (carla.Vehicle): Vehicle to set lights for.
+        """
         if not self.weather_type:
-            logging.error("Cannot set car lights (weather not set)")
+            logging.error("Cannot set vehicle lights (weather not set)")
             return
         light_mask = vehicle.get_light_state()
         if self.weather_type == WeatherType.FOGGY:
@@ -66,13 +95,18 @@ class WeatherManager:
         vehicle.set_light_state(carla.VehicleLightState(light_mask))
 
     def set_car_lights_all(self):
-        """Set car lights for foggy and rainy weather"""
+        """
+        Sets lights for all vehicles based on the current weather conditions.
+        """
         if not self.vehicles:
             logging.warning("Cannot set car lights (no vehicle info)")
         for ve in self.vehicles:
             self.set_car_lights(ve)
 
     def apply_settings(self):
+        """
+        Applies current weather and time settings to the world and updates vehicle lights.
+        """
         self.set_car_lights_all()
         self.world.set_weather(self.current_weather)
         logging.info(
@@ -80,6 +114,15 @@ class WeatherManager:
         )
 
     def set_weather(self, weather_type):
+        """
+        Sets the weather condition based on a given weather type.
+        
+        Parameters:
+            weather_type (WeatherType): Desired weather type to set.
+        
+        Raises:
+            ValueError: If an invalid weather type is provided.
+        """
         self.weather_type = weather_type
         if self.weather_type == WeatherType.CLEAR:
             self.current_weather = self.clear_weather
@@ -93,6 +136,15 @@ class WeatherManager:
             raise ValueError(f'Invalid weather type "{str(weather_type)}"')
 
     def set_time_of_day(self, time_of_day):
+        """
+        Sets the time of day in the simulation.
+        
+        Parameters:
+            time_of_day (TimeOfDay): Desired time of day to set.
+        
+        Raises:
+            ValueError: If an invalid time of day is provided.
+        """
         if self.current_weather is None:
             logging.error('Set weather before setting time of day')
             return
