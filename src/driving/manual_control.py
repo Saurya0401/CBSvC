@@ -48,14 +48,32 @@ from src.scenarios.weather import WeatherManager, WEATHER_PRESETS
 
 # global functions
 def get_actor_display_name(actor, truncate=250):
+    """
+    Get a human-readable name for an actor.
+
+    Args:
+        actor (carla.Actor): The actor to get the name of.
+        truncate (int, optional): Maximum length of the name. Defaults to 250.
+
+    Returns:
+        str: The display name of the actor.
+    """
     name = ' '.join(actor.type_id.replace('_', '.').title().split('.')[1:])
     return (name[:truncate - 1] + u'\u2026') if len(name) > truncate else name
 
 
 class World:
-    """Controls world settings"""
+    """Controls simulation world settings"""
 
     def __init__(self, carla_world, hud, actor_filter):
+        """
+        Initialize the World class.
+
+        Args:
+            carla_world (carla.World): The CARLA world object.
+            hud (HUD): The HUD object for displaying information.
+            actor_filter (str): The filter to select the actor.
+        """
         self.world = carla_world
         self.hud = hud
         self.player = None
@@ -73,6 +91,7 @@ class World:
         self.world.on_tick(hud.on_world_tick)
 
     def restart(self):
+        """Restart world and default to initial settings"""
         # Keep same camera config if the camera manager exists.
         cam_index = self.camera_manager.index if self.camera_manager is not None else 0
         cam_pos_index = self.camera_manager.transform_index if self.camera_manager is not None else 0
@@ -105,6 +124,7 @@ class World:
         self.hud.notification(actor_type)
 
     def next_weather(self):
+        """Cycle through and apply weather presets."""
         self._weather_index +=  1
         self._weather_index %= len(WEATHER_PRESETS)
         preset = WEATHER_PRESETS[self._weather_index]
@@ -113,13 +133,26 @@ class World:
         self._weather_man.apply_settings()
 
     def tick(self, clock):
+        """
+        Update HUD information every tick.
+
+        Args:
+            clock (pygame.time.Clock): Pygame clock to control the frame rate.
+        """
         self.hud.tick(self, clock)
 
     def render(self, display):
+        """
+        Render driver camera view and HUD.
+
+        Args:
+            display (pygame.Surface): Pygame display surface.
+        """
         self.camera_manager.render(display)
         self.hud.render(display)
 
     def destroy(self):
+        """Destroy all sensors and the player actor."""
         sensors = [
             self.camera_manager.sensor,
             self.collision_sensor.sensor,
@@ -137,6 +170,13 @@ class SteeringControl:
     """Parses and applies steering controls"""
 
     def __init__(self, world, start_in_autopilot):
+        """
+        Initialize the SteeringControl class.
+
+        Args:
+            world (World): The World object.
+            start_in_autopilot (bool): Whether to start in autopilot mode.
+        """
         self._autopilot_enabled = start_in_autopilot
         if isinstance(world.player, carla.Vehicle):
             self._control = carla.VehicleControl()
@@ -171,7 +211,17 @@ class SteeringControl:
         self._handbrake_idx = int(
             self._parser.get('G29 Racing Wheel', 'handbrake'))
 
-    def parse_events(self, world, clock):
+    def parse_events(self, world, _):
+        """
+        Parse events from the steering wheel and apply controls.
+
+        Args:
+            world (World): The World object.
+            _ (pygame.time.Clock): Unused argument.
+
+        Returns:
+            bool: True if quit event is detected, False otherwise.
+        """
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 return True
@@ -196,6 +246,7 @@ class SteeringControl:
             world.player.apply_control(self._control)
 
     def _parse_vehicle_wheel(self):
+        """Parse inputs from the steering wheel."""
         numAxes = self._joystick.get_numaxes()
         jsInputs = [float(self._joystick.get_axis(i)) for i in range(numAxes)]
         # print (jsInputs)
@@ -232,8 +283,18 @@ class SteeringControl:
 
 
 class HUD:
+    """Heads-up display for the driver vehicle."""
 
     def __init__(self, width, height, name, zephyr_conn):
+        """
+        Initialize the HUD.
+
+        Args:
+            width (int): Width of the display.
+            height (int): Height of the display.
+            name (str): Unique name for log files.
+            zephyr_conn (multiprocessing.connection.Connection): Pipe for biometrics data stream.
+        """
         self.dim = (width, height)
         self.zephyr_conn = zephyr_conn
         font = pygame.font.Font(pygame.font.get_default_font(), 20)
@@ -268,12 +329,25 @@ class HUD:
             f.write('time_seconds,time,collision\n')
 
     def on_world_tick(self, timestamp):
+        """
+        Update server clock and simulation time.
+
+        Args:
+            timestamp (carla.Timestamp): Simulation timestamp.
+        """
         self._server_clock.tick()
         self.server_fps = self._server_clock.get_fps()
         self.frame = timestamp.frame
         self.simulation_time = timestamp.elapsed_seconds
 
     def tick(self, world, clock):
+        """
+        Update HUD information every tick.
+
+        Args:
+            world (World): The World object.
+            clock (pygame.time.Clock): Pygame clock to control the frame rate.
+        """
         self._notifications.tick(world, clock)
         if not self._show_info:
             return
@@ -381,15 +455,35 @@ class HUD:
             coll_f.write(f'{timestamp.seconds},{timestamp},{collision}\n')
 
     def toggle_info(self):
+        """Toggle the display of HUD information."""
         self._show_info = not self._show_info
 
     def notification(self, text, seconds=2.0):
+        """
+        Display a notification on the HUD.
+
+        Args:
+            text (str): The text of the notification.
+            seconds (float, optional): Duration to display the notification. Defaults to 2.0 seconds.
+        """
         self._notifications.set_text(text, seconds=seconds)
 
     def error(self, text):
+        """
+        Display an error message on the HUD.
+
+        Args:
+            text (str): The text of the error message.
+        """
         self._notifications.set_text('Error: %s' % text, (255, 0, 0))
 
     def render(self, display):
+        """
+        Render the HUD on the display.
+
+        Args:
+            display (pygame.Surface): Pygame display surface.
+        """
         if self._show_info:
             info_surface = pygame.Surface((220, self.dim[1]))
             info_surface.set_alpha(100)
@@ -429,7 +523,17 @@ class HUD:
 
 
 class FadingText(object):
+    """Display text that fades over time."""
+
     def __init__(self, font, dim, pos):
+        """
+        Initialize the FadingText class.
+
+        Args:
+            font (pygame.font.Font): Pygame font object.
+            dim (tuple): Dimensions of the text surface.
+            pos (tuple): Position of the text surface.
+        """
         self.font = font
         self.dim = dim
         self.pos = pos
@@ -437,6 +541,14 @@ class FadingText(object):
         self.surface = pygame.Surface(self.dim)
 
     def set_text(self, text, color=(255, 255, 255), seconds=2.0):
+        """
+        Set the text to display.
+
+        Args:
+            text (str): The text to display.
+            color (tuple, optional): Color of the text. Defaults to white.
+            seconds (float, optional): Duration to display the text. Defaults to 2.0 seconds.
+        """
         text_texture = self.font.render(text, True, color)
         self.surface = pygame.Surface(self.dim)
         self.seconds_left = seconds
@@ -444,16 +556,39 @@ class FadingText(object):
         self.surface.blit(text_texture, (10, 11))
 
     def tick(self, _, clock):
+        """
+        Update the remaining time for the text to be displayed.
+
+        Args:
+            _ (any): Placeholder argument.
+            clock (pygame.time.Clock): Pygame clock to control the frame rate.
+        """
         delta_seconds = 1e-3 * clock.get_time()
         self.seconds_left = max(0.0, self.seconds_left - delta_seconds)
         self.surface.set_alpha(500.0 * self.seconds_left)
 
     def render(self, display):
+        """
+        Render the fading text on the display.
+
+        Args:
+            display (pygame.Surface): Pygame display surface.
+        """
         display.blit(self.surface, self.pos)
 
 
 class HelpText(object):
+    """Display help text on the screen."""
+
     def __init__(self, font, width, height):
+        """
+        Initialize the HelpText class.
+
+        Args:
+            font (pygame.font.Font): Pygame font object.
+            width (int): Width of the display.
+            height (int): Height of the display.
+        """
         lines = __doc__.split('\n')
         self.font = font
         self.dim = (680, len(lines) * 22 + 12)
@@ -468,15 +603,31 @@ class HelpText(object):
         self.surface.set_alpha(220)
 
     def toggle(self):
+        """Toggle the display of help text."""
         self._render = not self._render
 
     def render(self, display):
+        """
+        Render the help text on the display.
+
+        Args:
+            display (pygame.Surface): Pygame display surface.
+        """
         if self._render:
             display.blit(self.surface, self.pos)
 
 
 class CollisionSensor(object):
+    """Collision sensor for the vehicle."""
+
     def __init__(self, parent_actor, hud):
+        """
+        Initialize the CollisionSensor class.
+
+        Args:
+            parent_actor (carla.Actor): The actor to attach the sensor to.
+            hud (HUD): The HUD object for displaying information.
+        """
         self.sensor = None
         self.history = []
         self._parent = parent_actor
@@ -490,6 +641,12 @@ class CollisionSensor(object):
         self.sensor.listen(lambda event: CollisionSensor._on_collision(weak_self, event))
 
     def get_collision_history(self):
+        """
+        Get the history of collisions.
+
+        Returns:
+            dict: A dictionary with the frame number as the key and collision intensity as the value.
+        """
         history = collections.defaultdict(int)
         for frame, intensity in self.history:
             history[frame] += intensity
@@ -497,6 +654,13 @@ class CollisionSensor(object):
 
     @staticmethod
     def _on_collision(weak_self, event):
+        """
+        Handle collision events.
+
+        Args:
+            weak_self (weakref.ref): Weak reference to the CollisionSensor instance.
+            event (carla.CollisionEvent): The collision event.
+        """
         self = weak_self()
         if not self:
             return
@@ -510,6 +674,8 @@ class CollisionSensor(object):
 
 
 class LaneInvasionSensor(object):
+    """Lane invasion sensor for the vehicle."""
+
     def __init__(self, parent_actor, hud):
         self.sensor = None
         self._parent = parent_actor
@@ -524,6 +690,14 @@ class LaneInvasionSensor(object):
 
     @staticmethod
     def _on_invasion(weak_self, event):
+        """
+        Handle lane invasion events.
+
+        Args:
+            weak_self (weakref.ref): Weak reference to the LaneInvasionSensor instance.
+            event (carla.LaneInvasionEvent): The lane invasion event.
+        """
+
         self = weak_self()
         if not self:
             return
@@ -533,7 +707,15 @@ class LaneInvasionSensor(object):
 
 
 class GnssSensor(object):
+    """GNSS sensor for the vehicle."""
+
     def __init__(self, parent_actor):
+        """
+        Initialize the GnssSensor class.
+
+        Args:
+            parent_actor (carla.Actor): The actor to attach the sensor to.
+        """
         self.sensor = None
         self._parent = parent_actor
         self.lat = 0.0
@@ -548,6 +730,13 @@ class GnssSensor(object):
 
     @staticmethod
     def _on_gnss_event(weak_self, event):
+        """
+        Handle GNSS events.
+
+        Args:
+            weak_self (weakref.ref): Weak reference to the GnssSensor instance.
+            event (carla.GnssEvent): The GNSS event.
+        """
         self = weak_self()
         if not self:
             return
@@ -556,7 +745,16 @@ class GnssSensor(object):
 
 
 class CameraManager(object):
+    """Manages camera sensors attached to the vehicle."""
+
     def __init__(self, parent_actor, hud):
+        """
+        Initialize the CameraManager class.
+
+        Args:
+            parent_actor (carla.Actor): The actor to attach the camera to.
+            hud (HUD): The HUD object for displaying information.
+        """
         self.sensor = None
         self.surface = None
         self._parent = parent_actor
@@ -588,10 +786,18 @@ class CameraManager(object):
         self.index = None
 
     def toggle_camera(self):
+        """Toggle the camera position."""
         self.transform_index = (self.transform_index + 1) % len(self._camera_transforms)
         self.sensor.set_transform(self._camera_transforms[self.transform_index])
 
     def set_sensor(self, index, notify=True):
+        """
+        Set the active sensor.
+
+        Args:
+            index (int): Index of the sensor to set.
+            notify (bool, optional): Whether to display a notification. Defaults to True.
+        """
         index = index % len(self.sensors)
         needs_respawn = True if self.index is None \
             else self.sensors[index][0] != self.sensors[self.index][0]
@@ -612,18 +818,33 @@ class CameraManager(object):
         self.index = index
 
     def next_sensor(self):
+        """Switch to the next sensor."""
         self.set_sensor(self.index + 1)
 
     def toggle_recording(self):
+        """Toggle recording of camera feed."""
         self.recording = not self.recording
         self.hud.notification('Recording %s' % ('On' if self.recording else 'Off'))
 
     def render(self, display):
+        """
+        Render the camera feed on the display.
+
+        Args:
+            display (pygame.Surface): Pygame display surface.
+        """
         if self.surface is not None:
             display.blit(self.surface, (0, 0))
 
     @staticmethod
     def _parse_image(weak_self, image):
+        """
+        Parse the image from the camera.
+
+        Args:
+            weak_self (weakref.ref): Weak reference to the CameraManager instance.
+            image (carla.Image): The image from the camera.
+        """
         self = weak_self()
         if not self:
             return
@@ -652,6 +873,14 @@ class CameraManager(object):
 
 
 def game_loop(args, parent_conn, child_conn):
+    """
+    Main game loop.
+
+    Args:
+        args (argparse.Namespace): Parsed command-line arguments.
+        parent_conn (multiprocessing.connection.Connection): Parent connection for biometrics data.
+        child_conn (multiprocessing.connection.Connection): Child connection for biometrics data.
+    """
     pygame.init()
     pygame.font.init()
     world = None
@@ -688,6 +917,7 @@ def game_loop(args, parent_conn, child_conn):
 
 
 def main():
+    """Main function to set up and run the CARLA client and Zephyr stream."""
     parent_conn, child_conn = Pipe()
     p = Process(target=monitor_and_send_biometrics, args=(child_conn,))
     try:
