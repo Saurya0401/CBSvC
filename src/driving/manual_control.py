@@ -792,6 +792,9 @@ def game_loop(args, parent_conn, child_conn):
 
 def main():
     """Main function to set up and run the CARLA client and Zephyr stream."""
+    if os.path.exists(args.name):
+        if input('This will overwrite an existing log file. Proceed? [Y/n]: ') not in ('Y', 'y'):
+            return
     parent_conn, child_conn = Pipe()
     p = Process(target=monitor_and_send_biometrics, args=(child_conn,))
     try:
