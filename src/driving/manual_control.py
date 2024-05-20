@@ -326,8 +326,8 @@ class HUD:
         self.collisions_log = f'src/logs/collisions_{name}_{datetime.datetime.now().strftime("%m-%d_%H%M")}.txt'
         with open(self.speed_log, 'w', encoding='utf-8') as f:
             f.write('time_seconds,time,speed,throttle,brake,steer,heart_rate,breathing_rate\n')
-        with open(self.collisions_log, 'w', encoding='utf-8') as f:
-            f.write('time_seconds,time,collision\n')
+        # with open(self.collisions_log, 'w', encoding='utf-8') as f:
+        #     f.write('time_seconds,time,collision\n')
 
     def on_world_tick(self, timestamp):
         """
@@ -452,8 +452,8 @@ class HUD:
         with open(self.speed_log, 'a', encoding='utf-8') as speed_f:
             speed_f.write(f'{timestamp.seconds},{timestamp},{speed:.2f},{c.throttle:.2f},{c.brake:.2f},{c.steer:.2f},{self.heart_rate},{self.breathing_rate}\n')
 
-        with open(self.collisions_log, 'a', encoding='utf-8') as coll_f:
-            coll_f.write(f'{timestamp.seconds},{timestamp},{collision}\n')
+        # with open(self.collisions_log, 'a', encoding='utf-8') as coll_f:
+        #     coll_f.write(f'{timestamp.seconds},{timestamp},{collision}\n')
 
     def toggle_info(self):
         """Toggle the display of HUD information."""
