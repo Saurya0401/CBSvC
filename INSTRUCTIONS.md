@@ -5,6 +5,14 @@
 3. Execute `cd C:\Users\aicps\CBSvC\src\zephyr`
 4. Execute `run.cmd`
 
+### Wait for biometrics to stabilize
+1. Open an Anaconda prompt
+2. Execute `conda activate carlaenv`
+3. Execute `cd C:\Users\aicps\CBSvC`
+4. Execute `python -m src.driving.zephyr_stream`
+5. Check console output and wait until biometrics are accurate and stable
+6. Once stable, `Ctrl+C` to stop program and continue with next steps
+
 ### Initialize scenario and traffic
 _**This step must be completed before starting manual control**_
 1. Open an Anaconda prompt
