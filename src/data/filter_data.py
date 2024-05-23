@@ -18,10 +18,17 @@ def remove_duplicates(log_file):
     df_new.to_csv(f'{f.parent}/{f.stem}_filtered.csv', index=False)
 
 def interpolate(df, col_name):
-    # df = df.where(df[col_name] <= 0, np.nan)
-    df[col_name] = df[col_name].replace(0, np.nan)
+    """
+    Interpolates the specified column in the DataFrame.
+    
+    Parameters:
+    df (pd.DataFrame): The DataFrame containing the data.
+    col_name (str): The name of the column to be interpolated.
+    """
+
+    df.loc[df[col_name] < 60, col_name] = np.nan
     df[col_name] = df[col_name].interpolate()
-    df[col_name] = df[col_name].replace(np.nan, 0)
+    df[col_name] = df[col_name].fillna(0)
 
 def remove_duplicates_multi(logs_dir):
     """Remove duplicates from all log files in a directory"""
@@ -60,7 +67,7 @@ if __name__ == '__main__':
         '-i', '--interpolate',
         action='store_true',
         default=False,
-        help='Interpolate invalid data'
+        help='Interpolate invalid data (WARNING: USE ONLY IF NECESSARY)'
     )
     args = parser.parse_args()
 

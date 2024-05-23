@@ -42,6 +42,7 @@ Execute `python -m src.data.filter_data`
 - Run without any arguments to filter all logs from `src\logs`
 - Use `-d <directory>` to filter all logs from `<directory>`. Filtered logs will be stored in `src\logs\filtered`.
 - Use `-f <log file>` to filter `<log file>`. Filtered log file will be stored as `<log file>_filtered.csv`.
+- Use `-i` to interpolate zero values in heart rate and breathing rate. **USE ONLY IF NECESSARY**.
 
 ### Plot data
 Execute `python -m src.data.plot_data <log file>`
