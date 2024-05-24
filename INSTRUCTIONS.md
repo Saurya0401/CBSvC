@@ -3,7 +3,7 @@
 ### Start Zephyr background process
 1. Open an Anaconda prompt
 3. Execute `cd C:\Users\aicps\CBSvC\src\zephyr`
-4. Execute `run.cmd`
+4. Execute `./run.cmd`
 
 ### Wait for biometrics to stabilize
 1. Open an Anaconda prompt
