@@ -45,7 +45,10 @@ Execute `python -m src.data.filter_data`
 - Use `-i` to interpolate zero values in heart rate and breathing rate. **USE ONLY IF NECESSARY**.
 
 ### Plot data
-Execute `python -m src.data.plot_data <log file>`
+Execute `python -m src.data.plot_data <log_file_pattern>`
+- The program will plot all files whose names have `<log_file_pattern>` in them.
+<br>E.g.: `python -m src.data.plot_data person_1` will plot all log files associated with person_1.
+- The default directory for log files is `src/logs/filtered`, can be changed by with `--dir <directory>`
 - Use `--all` to plot all data in separate graphs
 - Use `-d <data 1> <data 2> ...` to plot multiple data in separate graphs.
 <br>E.g.: `-d speed throttle` will produce two graphs, time vs speed and time vs throttle.

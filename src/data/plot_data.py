@@ -7,15 +7,17 @@ be plotted either in individual figures or combined into a single figure with
 shared axes.
 
 Usage:
-    python plot_logged_data.py <log_file> [options]
+    python plot_logged_data.py <log_file_pattern> [options]
 
 Options:
     -d, --data    Plot specific data(s) in multiple figures
     -c, --combi   Plot specific data(s) in a single figure
     --all         Plot all data in multiple figures
+    --dir DIR     Folder where log files are (default: src/logs/filtered)
 """
 
 from dataclasses import dataclass
+from pathlib import Path
 import argparse
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -60,15 +62,16 @@ class DataPlotter:
         colors (dict): Dictionary mapping data labels to colors.
     """
 
-    def __init__(self, df, figsize=(12, 6)):
+    def __init__(self, log_file, figsize=(12, 6)):
         """Initializes the DataPlotter with the given DataFrame and figure size.
 
         Args:
             df (pandas.DataFrame): DataFrame containing the logged data.
             figsize (tuple, optional): Size of the figure for the plots. Defaults to (12, 6).
         """
-        self.df = df
+        self.df = pd.read_csv(log_file)
         self.figsize = figsize
+        self.file_name = ' '.join(log_file.stem.split('_')[2:4]).title()
         self.colors = {
             'speed': 'blue',
             'throttle': 'green',
@@ -78,15 +81,14 @@ class DataPlotter:
             'breathing_rate': 'purple'
         }
 
-    @staticmethod
-    def _set_plot(title, lines=None):
+    def _set_plot(self, title, lines=None):
         """Sets the title and legend for the plot.
 
         Args:
             title (str): Title of the plot.
             lines (list, optional): List of Line2D objects for the legend. Defaults to None.
         """
-        plt.title(title)
+        plt.title(title + f' ({self.file_name})')
         if lines:
             plt.legend(handles=lines)
         plt.tight_layout()
@@ -166,9 +168,15 @@ LOG_DATA_INFO = {
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(__doc__)
     parser.add_argument(
-        'log_file',
+        'log_file_pattern',
         type=str,
-        help='Filtered log file to plot (src/logs/filtered/*.csv)'
+        help='Plot log file(s) with this pattern (src/logs/filtered/<pattern>.csv)'
+    )
+    parser.add_argument(
+        '--dir',
+        type=str,
+        default='src/logs/filtered',
+        help='Folder where log files are (default: %(default)s)'
     )
     group = parser.add_mutually_exclusive_group(required=True)
     group.add_argument(
@@ -192,14 +200,16 @@ if __name__ == '__main__':
     )
     args = parser.parse_args()
 
-    plotter = DataPlotter(pd.read_csv(args.log_file))
-    if args.all:
-        for log_data in LOG_DATA_INFO.values():
-            plotter.plot(log_data)
-    else:
-        if args.data:
-            for data in args.data:
-                plotter.plot(LOG_DATA_INFO[data])
-        elif args.combi:
-            plotter.plot_combination([LOG_DATA_INFO[data] for data in args.combi])
+
+    for log_file in Path(args.dir).glob(f'*{args.log_file_pattern}*'):
+        plotter = DataPlotter(log_file)
+        if args.all:
+            for log_data in LOG_DATA_INFO.values():
+                plotter.plot(log_data)
+        else:
+            if args.data:
+                for data in args.data:
+                    plotter.plot(LOG_DATA_INFO[data])
+            elif args.combi:
+                plotter.plot_combination([LOG_DATA_INFO[data] for data in args.combi])
     plt.show()
