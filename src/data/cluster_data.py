@@ -12,7 +12,8 @@ from typing import Optional
 from numpy.typing import NDArray
 from sklearn.preprocessing import StandardScaler
 from sklearn.decomposition import PCA
-from sklearn.cluster import DBSCAN
+from sklearn.cluster import DBSCAN, KMeans
+from sklearn.metrics import silhouette_score
 import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
@@ -83,7 +84,7 @@ class DataClusterer:
         scaler: StandardScaler = StandardScaler()
         return scaler.fit_transform(self.data[self.data_cols])
 
-    def _plot_clusters(self, X: NDArray, n_clusters: int) -> None:
+    def _plot_clusters(self, X: NDArray, n_clusters: int, is_dbscan: bool) -> None:
         """
         Plots clusters in a scatter plot.
 
@@ -92,8 +93,9 @@ class DataClusterer:
             n_clusters (int): Number of clusters.
         """
         unique_labels = set(self.labels)
-        core_samples_mask = np.zeros_like(self.labels, dtype=bool)
-        core_samples_mask[self.dbscan.core_sample_indices_] = True
+        if is_dbscan:
+            core_samples_mask = np.zeros_like(self.labels, dtype=bool)
+            core_samples_mask[self.dbscan.core_sample_indices_] = True
         colors = [plt.cm.Spectral(each) for each in np.linspace(0, 1, len(unique_labels))]
 
         for k, color in zip(unique_labels, colors):
@@ -114,20 +116,22 @@ class DataClusterer:
                 markersize=14,
                 label=label
             )
-            xy = X[class_member_mask & ~core_samples_mask]
-            plt.plot(
-                xy[:, 0], xy[:, 1],
-                marker='o',
-                markerfacecolor=tuple(color),
-                markeredgecolor='k',
-                markersize=6
-            )
+            if is_dbscan:
+                xy = X[class_member_mask & ~core_samples_mask]
+                plt.plot(
+                    xy[:, 0], xy[:, 1],
+                    marker='o',
+                    markerfacecolor=tuple(color),
+                    markeredgecolor='k',
+                    markersize=6
+                )
 
-        plt.title(f'DBSCAN estimated number of clusters: {n_clusters}')
+        algo_name = 'DBSCAN' if is_dbscan else 'KMeans++'
+        plt.title(f'{algo_name} estimated number of clusters: {n_clusters}')
         plt.legend()
         plt.show()
 
-    def cluster_DBSCAN(self, use_PCA: bool, plot_results: bool = True) -> None:
+    def cluster_DBSCAN(self, n_pca_comp: Optional[int], plot_results: bool = True) -> None:
         """
         Clusters the data using DBSCAN and optionally applies PCA for dimensionality reduction.
 
@@ -136,20 +140,63 @@ class DataClusterer:
             plot_results (bool): Whether to plot the clustering results.
         """
         norm_data: NDArray = self._normalize_data()
-        if use_PCA:
-            pca = PCA(n_components=2)
+        use_pca: bool = isinstance(n_pca_comp, int) and n_pca_comp > 0
+        if use_pca:
+            pca = PCA(n_components=n_pca_comp)
             norm_data = pca.fit_transform(norm_data)
         self.labels = self.dbscan.fit_predict(norm_data)
 
         n_clusters = len(set(self.labels)) - (1 if -1 in self.labels else 0)
         n_noise = list(self.labels).count(-1)
         print('\nDBSCAN:')
-        print(f'PCA components: {pca.components_.shape[0] if use_PCA else "N/A"}')
+        print(f'PCA components: {pca.components_.shape[0] if use_pca else "N/A"}')
         print(f'Estimated number of clusters: {n_clusters}')
         print(f'Estimated number of noise points: {n_noise}\n')
 
         if plot_results:
-            self._plot_clusters(norm_data, n_clusters)
+            self._plot_clusters(norm_data, n_clusters, is_dbscan=True)
+
+    def cluster_kmeans(self, n_pca_comp: Optional[int], plot_results: bool = True) -> None:
+        """
+        Clusters the data with KMeans++ after finding the optimal number of clusters
+        via silhouette analysis. Optionally applies PCA for dimensionality reduction.
+
+        Args:
+            use_PCA (bool): Whether to use PCA for dimensionality reduction.
+            plot_results (bool): Whether to plot the clustering results.
+        """
+        norm_data: NDArray = self._normalize_data()
+        use_pca: bool = isinstance(n_pca_comp, int) and n_pca_comp > 0
+        if use_pca:
+            pca = PCA(n_components=n_pca_comp)
+            norm_data = pca.fit_transform(norm_data)
+
+        range_n_clusters = list(range(2, 10))
+        silhouette_avg = []
+        labels = []
+        print('\nKMeans++:')
+        # Perform K-means clustering for each number of clusters in the range
+        for n_clusters in range_n_clusters:
+            print(f'performing KMeans++ with {n_clusters} clusters...', end='\t', flush=True)
+            kmeans = KMeans(n_clusters=n_clusters, init='k-means++')
+            cluster_labels = kmeans.fit_predict(norm_data)
+            labels.append(cluster_labels)
+
+            # Calculate silhouette score (silhouette analysis)
+            cluster_score = silhouette_score(norm_data, cluster_labels)
+            silhouette_avg.append(cluster_score)
+            print(f'silhouette score = {cluster_score}')
+
+        # Determine the optimal number of clusters based on silhouette score
+        optimal_clusters = range_n_clusters[np.argmax(silhouette_avg)]
+        self.labels = labels[np.argmax(silhouette_avg)]
+        print(f'PCA components: {pca.components_.shape[0] if use_pca else "N/A"}')
+        print(f'Optimal number of clusters (Silhouette Analysis): {optimal_clusters}')
+        # KMeans++ does not differentiate noise! Importatnt distinction from DBSCAN
+        print('Estimated number of noise points: N/A\n')
+
+        if plot_results:
+            self._plot_clusters(norm_data, optimal_clusters, is_dbscan=False)
 
     def summarize_clustering(self) -> None:
         """
@@ -195,9 +242,9 @@ def main():
     clu = DataClusterer(args.scenario, args.logs_dir, args.data_cols)
     if args.algorithm == 'dbscan':
         clu.cluster_DBSCAN(args.pca, args.plot_clustering)
-        clu.summarize_clustering()
     elif args.algorithm == 'kmeans++':
-        raise NotImplementedError('kmeans++ unavailable')
+        clu.cluster_kmeans(args.pca, args.plot_clustering)
+    clu.summarize_clustering()
 
 
 if __name__ == '__main__':
@@ -216,8 +263,9 @@ if __name__ == '__main__':
     )
     parser.add_argument(
         '--pca',
-        action='store_true',
-        help='Do PCA filtering before clustering'
+        type=int,
+        metavar='N_COMPONENTS',
+        help='# of components for PCA, ignore to skip PCA'
     )
     parser.add_argument(
         '--plot_clustering',
@@ -236,7 +284,7 @@ if __name__ == '__main__':
         metavar='DIR',
         type=str,
         default='src/logs/filtered',
-        help='Filter all logs from this directory (default: %(default)s)'
+        help='Logs directory to take data from (default: %(default)s)'
     )
     args = parser.parse_args()
     main()
