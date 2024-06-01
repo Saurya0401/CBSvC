@@ -6,6 +6,7 @@ from log files for different scenarios.
 """
 
 import argparse
+from concurrent.futures import ProcessPoolExecutor
 from pathlib import Path
 from typing import Optional
 
@@ -131,7 +132,7 @@ class DataClusterer:
         plt.legend()
         plt.show()
 
-    def cluster_DBSCAN(self, n_pca_comp: Optional[int], plot_results: bool = True) -> None:
+    def cluster_DBSCAN(self, n_pca_comp: Optional[int], plot_results: bool) -> None:
         """
         Clusters the data using DBSCAN and optionally applies PCA for dimensionality reduction.
 
@@ -156,7 +157,7 @@ class DataClusterer:
         if plot_results:
             self._plot_clusters(norm_data, n_clusters, is_dbscan=True)
 
-    def cluster_kmeans(self, n_pca_comp: Optional[int], plot_results: bool = True) -> None:
+    def cluster_kmeans(self, n_pca_comp: Optional[int], plot_results: bool, compute_parallel: bool) -> None:
         """
         Clusters the data with KMeans++ after finding the optimal number of clusters
         via silhouette analysis. Optionally applies PCA for dimensionality reduction.
@@ -164,6 +165,7 @@ class DataClusterer:
         Args:
             use_PCA (bool): Whether to use PCA for dimensionality reduction.
             plot_results (bool): Whether to plot the clustering results.
+            compute_parallel (bool): Calculate optimal clusters much faster with parallel computing
         """
         norm_data: NDArray = self._normalize_data()
         use_pca: bool = isinstance(n_pca_comp, int) and n_pca_comp > 0
@@ -172,24 +174,32 @@ class DataClusterer:
             norm_data = pca.fit_transform(norm_data)
 
         range_n_clusters = list(range(2, 10))
-        silhouette_avg = []
-        labels = []
+        silhouette_scores = []
+        cluster_labels = []
         print('\nKMeans++:')
-        # Perform K-means clustering for each number of clusters in the range
-        for n_clusters in range_n_clusters:
-            print(f'performing KMeans++ with {n_clusters} clusters...', end='\t', flush=True)
-            kmeans = KMeans(n_clusters=n_clusters, init='k-means++')
-            cluster_labels = kmeans.fit_predict(norm_data)
-            labels.append(cluster_labels)
 
-            # Calculate silhouette score (silhouette analysis)
-            cluster_score = silhouette_score(norm_data, cluster_labels)
-            silhouette_avg.append(cluster_score)
-            print(f'silhouette score = {cluster_score}')
+        # Use ProcessPoolExecutor for parallel processing
+        if compute_parallel:
+            futures = []
+            with ProcessPoolExecutor() as executor:
+                for clusters in range_n_clusters:
+                    futures.append(executor.submit(
+                        DataClusterer.kmeans_clustering, norm_data, clusters
+                    ))
+
+            for future in futures:
+                labels, score = future.result()
+                cluster_labels.append(labels)
+                silhouette_scores.append(score)
+        else:
+            for clusters in range_n_clusters:
+                labels, score = DataClusterer.kmeans_clustering(norm_data, clusters)
+                cluster_labels.append(labels)
+                silhouette_scores.append(score)
 
         # Determine the optimal number of clusters based on silhouette score
-        optimal_clusters = range_n_clusters[np.argmax(silhouette_avg)]
-        self.labels = labels[np.argmax(silhouette_avg)]
+        optimal_clusters = range_n_clusters[np.argmax(silhouette_scores)]
+        self.labels = cluster_labels[np.argmax(silhouette_scores)]
         print(f'PCA components: {pca.components_.shape[0] if use_pca else "N/A"}')
         print(f'Optimal number of clusters (Silhouette Analysis): {optimal_clusters}')
         # KMeans++ does not differentiate noise! Importatnt distinction from DBSCAN
@@ -237,13 +247,34 @@ class DataClusterer:
         fig.tight_layout()
         plt.show()
 
+    @staticmethod
+    def kmeans_clustering(norm_data, n_clusters):
+        """
+        Performs KMeans++ clustering and does silhouette analysis on results
+        
+        Args:
+            norm_data (NDArrray): normalized input data
+            n_clusters (int): number of clusters for KMeans++
+
+        Returns:
+            tuple: NDArray of clustered labels and the silhouette score
+        """
+        print(f'performing KMeans++ with {n_clusters} clusters...')
+        kmeans = KMeans(n_clusters=n_clusters, init='k-means++')
+        cluster_labels = kmeans.fit_predict(norm_data)
+
+        # Calculate silhouette score (silhouette analysis)
+        cluster_score = silhouette_score(norm_data, cluster_labels)
+        print(f'silhouette score for {n_clusters} clusters = {cluster_score}')
+        return cluster_labels, cluster_score
+
 
 def main():
     clu = DataClusterer(args.scenario, args.logs_dir, args.data_cols)
     if args.algorithm == 'dbscan':
         clu.cluster_DBSCAN(args.pca, args.plot_clustering)
     elif args.algorithm == 'kmeans++':
-        clu.cluster_kmeans(args.pca, args.plot_clustering)
+        clu.cluster_kmeans(args.pca, args.plot_clustering, args.parallel)
     clu.summarize_clustering()
 
 
@@ -285,6 +316,13 @@ if __name__ == '__main__':
         type=str,
         default='src/logs/filtered',
         help='Logs directory to take data from (default: %(default)s)'
+    )
+    parser.add_argument(
+        '--parallel',
+        action='store_true',
+        default=False,
+        help='Do KMeans++ optimal cluster detection with parallel computing. ' \
+        'This speeds up the process but may cause crashes if there are resource shortages'
     )
     args = parser.parse_args()
     main()

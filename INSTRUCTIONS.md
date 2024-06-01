@@ -66,4 +66,5 @@ Execute `python -m src.data.cluster_data <scenario_name> <clustering_algorithm>`
 - Use `--data_cols` to specify which data columns to include while clustering. The default is `speed`, `heart_rate`, `breathing_rate`.
 <br>E.g.: `--data_cols speed brake throttle` will include only speed, brake, and throttle data while clustering.
 - The default logs directory to take data from is `src/logs/filtered`, can be changed by with `--dir <directory>`
+- Use `--parallel` to do KMeans++ optimal cluster detection with parallel computing. This speeds up the process but may cause crashes if there are resource shortages.
 - Execute `python -m src.data.cluster_data --help` for more info on command line args.
