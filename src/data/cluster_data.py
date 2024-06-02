@@ -19,8 +19,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
 
-from src.scenarios.scenario import Scenario
-
 
 class DataClusterer:
 
@@ -283,7 +281,7 @@ if __name__ == '__main__':
     parser.add_argument(
         'scenario',
         type=str,
-        choices=[s.name for s in Scenario],
+        choices=['default', 'night', 'overspeeding', 'distracted', 'congestion'],
         help='Scenario name'
     )
     parser.add_argument(
