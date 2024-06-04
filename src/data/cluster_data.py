@@ -43,7 +43,7 @@ class DataClusterer:
         self.data = self.data.dropna(subset=self.data_cols)
 
         # modify DBSCAN hyperparameters here
-        self.dbscan: DBSCAN = DBSCAN(eps=0.5, min_samples=5)
+        self.dbscan: DBSCAN = DBSCAN(eps=1.0, min_samples=500)
 
         self.labels: Optional[NDArray] = None
 

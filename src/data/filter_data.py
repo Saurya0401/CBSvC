@@ -14,7 +14,7 @@ def remove_duplicates(log_file):
 
     f = Path(log_file)
     df = pd.read_csv(f)
-    df_new = df.drop_duplicates(subset=['speed', 'throttle', 'brake', 'steer'], keep='first')
+    df_new = df.drop_duplicates(keep='first')
     df_new.to_csv(f'{f.parent}/{f.stem}_filtered.csv', index=False)
 
 def interpolate(df, col_name):
@@ -38,7 +38,7 @@ def remove_duplicates_multi(logs_dir):
 
     for f in Path(logs_dir).glob('*.csv'):
         df = pd.read_csv(f)
-        df_new = df.drop_duplicates(subset=['speed', 'throttle', 'brake', 'steer'], keep='first')
+        df_new = df.drop_duplicates(keep='first')
         if args.interpolate:
             try:
                 interpolate(df_new, 'heart_rate')
