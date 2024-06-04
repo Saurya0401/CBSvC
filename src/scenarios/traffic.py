@@ -102,7 +102,7 @@ class TrafficGenerator:
                 vehicle.set_autopilot(True)
                 self.traffic_manager.auto_lane_change(vehicle, True)
                 if self.args.aggression:
-                    self.set_aggressive_behavior(vehicle)
+                    self.set_aggressive_behavior(vehicle, True, True, True, True)
                 if not self.args.disable_car_lights:
                     self.traffic_manager.update_vehicle_lights(vehicle, True)
                 path = self.route_1 if self.alt else self.route_2
