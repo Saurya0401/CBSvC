@@ -8,7 +8,7 @@ from log files for different scenarios.
 import argparse
 from concurrent.futures import ProcessPoolExecutor
 from pathlib import Path
-from typing import Optional
+from typing import Optional, Dict, List
 
 from numpy.typing import NDArray
 from sklearn.preprocessing import StandardScaler
@@ -22,32 +22,34 @@ import pandas as pd
 
 class DataClusterer:
 
-    DATA_COLS: list[str] = ['speed', 'heart_rate', 'breathing_rate']
+    DATA_COLS: List[str] = ['speed', 'heart_rate', 'breathing_rate']
 
-    def __init__(self, scenario_name: str, logs_dir: str, data_cols: Optional[list[str]] = None) -> None:
+    def __init__(self, scenarios: List[str], logs_dir: str, data_cols: Optional[List[str]] = None) -> None:
         """
         Clusters data from log files using the DBSCAN or KMeans++ algorithm.
 
         Attributes:
             scenario_name (str): The name of the scenario.
             logs_dir (str): Directory containing log files.
-            data_cols (list[str]): Columns to include in clustering.
+            data_cols (List[str]): Columns to include in clustering.
         """
 
-        self.scenario_name: str = scenario_name
+        self.scenarios: List[str] = scenarios
         self.logs_dir: str = logs_dir
-        self.data_cols: list[str] = data_cols or DataClusterer.DATA_COLS
-        self.data: pd.DataFrame = self._load_data().reset_index(drop=True)
-        self.data[self.data_cols] = self.data[self.data_cols] \
-            .apply(pd.to_numeric, errors='coerce')
-        self.data = self.data.dropna(subset=self.data_cols)
+        self.data_cols: List[str] = data_cols or DataClusterer.DATA_COLS
+        if len(self.scenarios) == 1:
+            self.scenario = self.scenarios[0]
+            self.data: pd.DataFrame = self._load_data().reset_index(drop=True)
+            self.data[self.data_cols] = self.data[self.data_cols] \
+                .apply(pd.to_numeric, errors='coerce')
+            self.data = self.data.dropna(subset=self.data_cols)
 
-        # modify DBSCAN hyperparameters here
-        self.dbscan: DBSCAN = DBSCAN(eps=1.0, min_samples=500)
+            # modify DBSCAN hyperparameters here
+            self.dbscan: DBSCAN = DBSCAN(eps=1.0, min_samples=500)
 
-        self.labels: Optional[NDArray] = None
+            self.labels: Optional[NDArray] = None
 
-    def _read_csv(self, file: Path) -> pd.DataFrame:
+    def _read_csv(self, file: Path, data_col: Optional[str] = None) -> pd.DataFrame:
         """
         Reads a CSV file and returns a DataFrame.
 
@@ -58,9 +60,10 @@ class DataClusterer:
             pd.DataFrame: DataFrame containing the data from the CSV file.
         """
         print(f'Reading "{file.name}"')
-        return pd.read_csv(file, usecols=['time_seconds', *self.data_cols])
+        data_cols: List[str] = [data_col] if data_col else ['time_seconds', *self.data_cols]
+        return pd.read_csv(file, usecols=data_cols)
 
-    def _load_data(self) -> pd.DataFrame:
+    def _load_data(self, scenario: Optional[str] = None, data_col: Optional[str] = None) -> pd.DataFrame:
         """
         Loads data from all CSV files matching the scenario name in the logs directory.
 
@@ -68,7 +71,7 @@ class DataClusterer:
             pd.DataFrame: Concatenated DataFrame containing data from all matched files.
         """
         data: pd.DataFrame = pd.concat([
-            self._read_csv(f) for f in Path(self.logs_dir).glob(f'*{self.scenario_name}*')
+            self._read_csv(f, data_col) for f in Path(self.logs_dir).glob(f'*{scenario or self.scenario}*')
         ], ignore_index=True)
         print(f'Read {len(data)} samples.')
         return data
@@ -128,6 +131,38 @@ class DataClusterer:
         algo_name = 'DBSCAN' if is_dbscan else 'KMeans++'
         plt.title(f'{algo_name} estimated number of clusters: {n_clusters}')
         plt.legend()
+        plt.show()
+
+    def boxplots_summary(self) -> None:
+        data_units: Dict[str, str] = {
+            'speed': 'km/h',
+            'heart_rate': 'beats/min',
+            'breathing_rate': 'breaths/min',
+            'throttle': '',
+            'brake': '',
+            'steer': ''
+        }
+        for col in self.data_cols:
+            all_scenario_data: List[pd.DataFrame] = [
+                self._load_data(scenario, col) for scenario in self.scenarios
+            ]
+            for scenario_data, scenario in zip(all_scenario_data, self.scenarios):
+                scenario_data.insert(0, 'scenario', [scenario] * len(scenario_data))
+            data: pd.DataFrame = pd.concat(all_scenario_data)
+            fig, ax = plt.subplots(figsize=(len(self.scenarios), 6))
+            data.boxplot(
+                by='scenario',
+                ax=ax,
+                vert=True,
+                patch_artist=True,
+                boxprops={'facecolor': 'lightblue'}
+            )
+            ax.set_title('')
+            ax.set_xlabel('Scenario')
+            ax.set_ylabel(f'{col} ({data_units[col]})')
+            ax.grid(True, linestyle='-', which='major', color='lightgrey', alpha=0.7)
+            fig.suptitle(f'Data Summary for {col.replace("_", " ").title()}')
+            fig.tight_layout()
         plt.show()
 
     def cluster_DBSCAN(self, n_pca_comp: Optional[int], plot_results: bool) -> None:
@@ -241,7 +276,7 @@ class DataClusterer:
             ax.set_ylabel(column)
             ax.grid(True, linestyle='-', which='major', color='lightgrey', alpha=0.7)
 
-        fig.suptitle(f'Clustering for scenario "{self.scenario_name}"')
+        fig.suptitle(f'Clustering for scenario "{self.scenario}"')
         fig.tight_layout()
         plt.show()
 
@@ -268,8 +303,15 @@ class DataClusterer:
 
 
 def main():
-    clu = DataClusterer(args.scenario, args.logs_dir, args.data_cols)
-    if args.algorithm == 'dbscan':
+    if 'all' in args.scenarios:
+        args.scenarios = ['default', 'night', 'overspeeding', 'distracted', 'congestion']
+    if len(args.scenarios) > 1 and args.algorithm != 'boxplots':
+        raise SystemExit('Multiple scenarios can only be specified for boxplots')
+    clu = DataClusterer(args.scenarios, args.logs_dir, args.data_cols)
+    if args.algorithm == 'boxplots':
+        clu.boxplots_summary()
+        return
+    elif args.algorithm == 'dbscan':
         clu.cluster_DBSCAN(args.pca, args.plot_clustering)
     elif args.algorithm == 'kmeans++':
         clu.cluster_kmeans(args.pca, args.plot_clustering, args.parallel)
@@ -279,15 +321,16 @@ def main():
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(__doc__)
     parser.add_argument(
-        'scenario',
+        'scenarios',
         type=str,
-        choices=['default', 'night', 'overspeeding', 'distracted', 'congestion'],
+        choices=['default', 'night', 'overspeeding', 'distracted', 'congestion', 'all'],
+        nargs='+',
         help='Scenario name'
     )
     parser.add_argument(
         'algorithm',
         type=str,
-        choices=['dbscan', 'kmeans++'],
+        choices=['boxplots', 'dbscan', 'kmeans++'],
         help='Clustering algorithm to use'
     )
     parser.add_argument(
