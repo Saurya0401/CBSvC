@@ -77,6 +77,38 @@ The idea is to evaluate the driver's reaction to various driving scenarios by an
 *Aggresive driving can make congestion worse. The driver in this scenario braked more frequently and stayed stuck in traffic for a longer period of time due to an accident caused by aggresive drivers breaking traffic rules.*
 
 * * *
+### Final Results
+#### Default
+![Default](/CBSvC/assets/images/Default_boxplot.png)
+
+
+#### Night
+![Night](/CBSvC/assets/images/Night_boxplot.png)
+
+#### Distracted
+![Distracted](/CBSvC/assets/images/Distracted_boxplot.png)
+
+#### Overspeeding
+![Overspeeding](/CBSvC/assets/images/Overspeeding_boxplot.png)
+
+#### Congested
+![Congested](/CBSvC/assets/images/Congested_boxplot.png)
+
+#### Summary of Results
+For Default versus when the surrounding vehicles are overspeeding, the heart rate increases from an average of 82 bpm in the default scenario to 86 bpm when surrounding vehicles are overspeeding. This suggests a slight elevation  in stress levels possibly due to the increased pace and potential perceived risk of the driving environment.
+
+For default versus when the surrounding vehicles are distracted, an even larger increase in heart rate is observed, from 82 bpm to 88 bpm. This indicates that drivers may experience higher stress or anxiety when nearby drivers are distracted, possibly due to the unpredictability and increased perceived danger this scenario introduces.
+
+For default versus congestion, there’s a minor increase in average speed from 20 km/h to 17 km/h in congestion. This reduction in speed is typical of congested traffic conditions and reflects the restricted movement and potential frustration or stress associated with such environments.
+
+For default versus night driving, night driving results in a significant tendency to overspeed, over 40% higher compared ot the default. This could be due to less traffic and possibly overconfidence in less visually restrictive conditions. The average heart rate during night driving increases to 85 bpm, indicating elevated stress possibly due to the increased speed and the challenges of lower visibility. The average breathing rate decreases from 22 breaths per minute in the default scenario to 17 breaths per minute during night driving, which might indicate a calmer respiratory state despite the increased heart rate. This could be a result of concentration or focus required during night driving, which might lead to more controlled breathing.
+
+#### Conclusion
+- Speeds are lower in congestion and higher speeds when surrounding vehicles are overspeeding.
+- Heart rate and breathing rate are less sensitive to changes in driving conditions, maintaining a relatively stable range across the scenarios. 
+- The consistency in heart rate and breathing rate across conditions might suggest that physiological conditions are not heavily affected by external driving conditions, or that the driver is accustomed to these varying conditions.
+
+* * *
 
 ### Team Member Responsibilities
 * **Aniruddha Chaki**
