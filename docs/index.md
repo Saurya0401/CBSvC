@@ -86,7 +86,7 @@ The idea is to evaluate the driver's reaction to various driving scenarios by an
 ![Night](/CBSvC/assets/images/Night_boxplot.png)
 
 #### Distracted
-![Distracted](/CBSvC/assets/images/Distracted_boxplot.png)
+![Distracted](/CBSvC/assets/images/Distracted_boxpolot.png)
 
 #### Overspeeding
 ![Overspeeding](/CBSvC/assets/images/Overspeeding_boxplot.png)
