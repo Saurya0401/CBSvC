@@ -77,21 +77,21 @@ The idea is to evaluate the driver's reaction to various driving scenarios by an
 *Aggresive driving can make congestion worse. The driver in this scenario braked more frequently and stayed stuck in traffic for a longer period of time due to an accident caused by aggresive drivers breaking traffic rules.*
 
 * * *
+
 ### Final Results
-#### Default
+#### Default Driving
 ![Default](/CBSvC/assets/images/Default_boxplot.png)
 
-
-#### Night
+#### Night Driving
 ![Night](/CBSvC/assets/images/Night_boxplot.png)
 
-#### Distracted
+#### Surrounded by Distracted Drivers
 ![Distracted](/CBSvC/assets/images/Distracted_boxpolot.png)
 
-#### Overspeeding
+#### Surrounded by Overspeeding Drivers
 ![Overspeeding](/CBSvC/assets/images/Overspeeding_boxplot.png)
 
-#### Congested
+#### Driving in Congested Traffic
 ![Congested](/CBSvC/assets/images/Congested_boxplot.png)
 
 #### Summary of Results
