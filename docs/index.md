@@ -5,8 +5,8 @@ This study aims to evaluate the physiological impacts of interacting with driver
 
 * * *
 
-### Proposed Timeline
-![Proposed Timeline](/CBSvC/assets/images/Timeline3.png)
+### Project Timeline
+![Project Timeline](/CBSvC/assets/images/complete_timeline.png)
 
 
 ### Literature Review
