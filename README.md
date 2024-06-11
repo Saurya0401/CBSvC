@@ -23,6 +23,9 @@ We would like to analyze the effects, if any, of drivers with varying behaviors 
 
 ![Block Diagram](blob/BlockDiagram2.jpg?raw=true)
 
+## Project Timeline ##
+
+![Timeline](docs/assets/images/complete_timeline.png?raw=true)
 ## Hardware and Software Requirements ##
 Hardware requirements include:
 
@@ -39,9 +42,9 @@ Software requirements include
 - CARLA Simulator
 - Matlab
 ## Goal ##
-- Research and implement traffic scenarios on CARLA simulator.
-- Gather data on human biometrics, such as heart rate and stress levels, along with vehicular metrics like speed and acceleration, to analyze and classify driving behavior.
-- Case Study on driving behaviour across various traffic conditions.
+- Research and implement traffic scenarios on the CARLA simulator.
+- Gather data on human biometrics, such as heart rate, stress levels, and vehicular metrics like speed and acceleration, to analyze and classify driving behavior.
+- Case Study on driving behavior across various traffic conditions.
 
 ## Driving Scenarios ##
 * Default environment -  control sample
@@ -53,6 +56,31 @@ Software requirements include
 * Congested Driving
     * Overcrowded roads
     * Overcrowded intersections
+## Final Results ##
+### Default Driving ###
+![Default](docs/assets/images/Default_boxplot.png)
+
+### Night Driving ###
+![Night](docs/assets/images/Night_boxplot.png)
+
+### Surrounded by Distracted Drivers ###
+![Distracted](docs/assets/images/Distracted_boxpolot.png)
+
+### Surrounded by Overspeeding Drivers ###
+![Overspeeding](docs/assets/images/Overspeeding_boxplot.png)
+
+### Driving in Congested Traffic ###
+![Congested](docs/assets/images/Congested_boxplot.png)
+
+## Summary of Results ##
+For Default versus when the surrounding vehicles are overspeeding, the heart rate increases from an average of 82 bpm in the default scenario to 86 bpm when surrounding vehicles are overspeeding. This suggests a slight elevation in stress levels possibly due to the increased pace and potential perceived risk of the driving environment.
+
+For default versus when the surrounding vehicles are distracted, an even larger increase in heart rate is observed, from 82 bpm to 88 bpm. This indicates that drivers may experience higher stress or anxiety when nearby drivers are distracted, possibly due to the unpredictability and increased perceived danger this scenario introduces.
+
+For default versus congestion, there’s a minor increase in average speed from 20 km/h to 17 km/h in congestion. This speed reduction is typical of congested traffic conditions and reflects the restricted movement and potential frustration or stress associated with such environments.
+
+For default versus night driving, night driving results in a significant tendency to overspeed, over 40% higher compared ot the default. This could be due to less traffic and possibly overconfidence in less visually restrictive conditions. The average heart rate during night driving increases to 85 bpm, indicating elevated stress possibly due to the increased speed and the challenges of lower visibility. The average breathing rate decreases from 22 breaths per minute in the default scenario to 17 breaths per minute during night driving, which might indicate a calmer respiratory state despite the increased heart rate. This could be a result of concentration or focus required during night driving, which might lead to more controlled breathing.
+
 
 ## Team Members Responsibilities ##
 ### Puya: ### 
@@ -66,10 +94,6 @@ Research and Design algorithms for the analysis required on collected data, Test
 ### Aniruddha: ###
 Data collection configuration, Test drive of the simulation, Setting up simulation constraints.
 
-## Project Timeline ##
-
-
-![Timeline](docs/assets/images/complete_timeline.png?raw=true)
 
 ## References ##
 <a id="1">[1]</a>  Y. Xia, M. Geng, Y. Chen, B. Zhang, Z. Gao, and X. (M.) Chen, "Understanding common human driving semantics for autonomous vehicles," IEEE Transactions on Intelligent Transportation Systems, 2023.
