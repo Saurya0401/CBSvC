@@ -69,7 +69,7 @@ Data collection configuration, Test drive of the simulation, Setting up simulati
 ## Project Timeline ##
 
 
-![Timeline](blob/Timeline3.png?raw=true)
+![Timeline](/CBSvC/assets/images/complete_timeline.png)
 
 ## References ##
 <a id="1">[1]</a>  Y. Xia, M. Geng, Y. Chen, B. Zhang, Z. Gao, and X. (M.) Chen, "Understanding common human driving semantics for autonomous vehicles," IEEE Transactions on Intelligent Transportation Systems, 2023.
