@@ -247,14 +247,14 @@ class SteeringControl:
             world.player.apply_control(self._control)
 
     def _parse_vehicle_wheel(self):
-        """Parse inputs from the steering wheel."""
+        """Parse inputs from the steering wheel and pedals."""
         numAxes = self._joystick.get_numaxes()
         jsInputs = [float(self._joystick.get_axis(i)) for i in range(numAxes)]
         # print (jsInputs)
         jsButtons = [float(self._joystick.get_button(i)) for i in
                      range(self._joystick.get_numbuttons())]
 
-        # Custom function to map range of inputs [1, -1] to outputs [0, 1] i.e 1 from inputs means nothing is pressed
+        # Custom function to map range of inputs [1, -1] to outputs [0, 1]
         # For the steering, it seems fine as it is
         K1 = 1.0  # 0.55
         steerCmd = K1 * math.tan(1.1 * jsInputs[self._steer_idx])
@@ -760,7 +760,6 @@ def game_loop(args, parent_conn, child_conn):
     """
     pygame.init()
     pygame.font.init()
-    world = None
 
     try:
         client = carla.Client('127.0.0.1', 2000)
