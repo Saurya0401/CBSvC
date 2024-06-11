@@ -149,7 +149,7 @@ class DataClusterer:
             for scenario_data, scenario in zip(all_scenario_data, self.scenarios):
                 scenario_data.insert(0, 'scenario', [scenario] * len(scenario_data))
             data: pd.DataFrame = pd.concat(all_scenario_data)
-            fig, ax = plt.subplots(figsize=(len(self.scenarios), 6))
+            fig, ax = plt.subplots(figsize=(len(self.scenarios), 8))
             data.boxplot(
                 by='scenario',
                 ax=ax,
@@ -158,11 +158,13 @@ class DataClusterer:
                 boxprops={'facecolor': 'lightblue'}
             )
             ax.set_title('')
-            ax.set_xlabel('Scenario')
+            ax.set_xlabel('')
+            ax.set_xticklabels(ax.xaxis.get_majorticklabels(), rotation=90)
             ax.set_ylabel(f'{col} ({data_units[col]})')
             ax.grid(True, linestyle='-', which='major', color='lightgrey', alpha=0.7)
             fig.suptitle(f'Data Summary for {col.replace("_", " ").title()}')
             fig.tight_layout()
+            plt.savefig(f'summ_{col}_new.png')
         plt.show()
 
     def cluster_DBSCAN(self, n_pca_comp: Optional[int], plot_results: bool) -> None:
