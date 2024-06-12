@@ -32,15 +32,26 @@ CARLA can be used to simulate complex driving scenarios incorporating several va
 
 * * *
 
-### Preliminary Design and Results
-#### System Design
+### System Design and Preliminary Results
+#### Methodology
 ![System Design](/CBSvC/assets/images/system_design.png)
 
 This project utilizes a Logitech G920 steering wheel and pedals control for driver input. Biometrics data is provided by a Zephyr bioharness strapped to the driver.
 
-Custom traffic scenarios are constructed in CARLA. These scenarios spawn traffic vehicles with custom behavior, such as aggressive driving, and in different weather conditions.
+Custom traffic scenarios are constructed in CARLA. These scenarios spawn traffic vehicles with custom behavior, such as aggressive driving, and in different weather conditions. We define five custom scenarios:
 
-The idea is to evaluate the driver's reaction to various driving scenarios by analyzing data from the ego vehicle and the driver's biometrics.
+1. **Default Driving**
+<br>Driving in clear sunny weather with normal traffic behavior.
+2. **Night Driving**
+<br>Driving in clear night weather with normal traffic behavior.
+3. **Surrounded by Distracted Drivers**
+<br>Driving in clear sunny weather but some surrounding drivers ignore traffic lights and stop signs.
+4. **Surrounded by Overspeeding Drivers**
+<br>Driving in clear sunny weather but some surrounding drivers overspeed.
+5. **Driving in Congested Traffic**
+<br>Driving in clear sunny weather through areas of traffic congestion.
+
+The idea is to evaluate the driver's reaction to various driving scenarios by analyzing data from the ego vehicle and the driver's biometrics. Data collection consists of making each participant drive each scenario for 10 minutes.
 
 #### Sample Results
 ![Clear Day Reaction](/CBSvC/assets/images/driving_clear_day.png)<br>
@@ -70,11 +81,6 @@ The idea is to evaluate the driver's reaction to various driving scenarios by an
 
 ![Driving in Congested Traffic](/CBSvC/assets/images/driving_congested.png)<br>
 *Driver tends to brake a lot more in congested traffic. Post-congestion, the driver tends to accelerate to higher speeds possibly due to frustation induced by the congestion.*
-
-
-
-![Driving in Congested Traffic with Aggresive Drivers](/CBSvC/assets/images/driving_congested_aggressive.png)<br>
-*Aggresive driving can make congestion worse. The driver in this scenario braked more frequently and stayed stuck in traffic for a longer period of time due to an accident caused by aggresive drivers breaking traffic rules.*
 
 * * *
 
