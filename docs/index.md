@@ -85,22 +85,39 @@ The idea is to evaluate the driver's reaction to various driving scenarios by an
 * * *
 
 ### Final Results
-#### Default Driving
+#### Overall Data Summary
+![Overall Summary](/CBSvC/assets/images/overall_summary.png)
+*Summary of vehicle speed, driver heart rate, and driver breathing rate data from all participants, across all scenarios*
+
+#### Data Clustering Results
 ![Default](/CBSvC/assets/images/Default_boxplot.png)
+*Default driving*
 
-#### Night Driving
+
+
 ![Night](/CBSvC/assets/images/Night_boxplot.png)
+*Night driving*
 
-#### Surrounded by Distracted Drivers
+
+
 ![Distracted](/CBSvC/assets/images/Distracted_boxpolot.png)
+*Surrounded by distracted drivers*
 
-#### Surrounded by Overspeeding Drivers
+
+
 ![Overspeeding](/CBSvC/assets/images/Overspeeding_boxplot.png)
+*Surrounded by overspeeding drivers*
 
-#### Driving in Congested Traffic
+
+
 ![Congested](/CBSvC/assets/images/Congested_boxplot.png)
+*Driving in Congested Traffic*
 
-#### Summary of Results
+
+
+#### Summary of Clustering Results
+We used data clustering to conduct a behavioral analysis of the collected data. The clustering algorithm used was DBSCAN and each data sample in the input data was a three element vector consisting of the vehicle speed, driver's heart rate, and driver's breathing rate.
+
 For Default versus when the surrounding vehicles are overspeeding, the heart rate increases from an average of 82 bpm in the default scenario to 86 bpm when surrounding vehicles are overspeeding. This suggests a slight elevation  in stress levels possibly due to the increased pace and potential perceived risk of the driving environment.
 
 For default versus when the surrounding vehicles are distracted, an even larger increase in heart rate is observed, from 82 bpm to 88 bpm. This indicates that drivers may experience higher stress or anxiety when nearby drivers are distracted, possibly due to the unpredictability and increased perceived danger this scenario introduces.
